@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import videoRouter from './interfaces/http/video-upload.router';
 
 dotenv.config();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -14,10 +15,9 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
-app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'API is running successfully!' });
-});
+app.use('/api', videoRouter);
+
 
 app.listen(PORT, () => {
-  console.log(` Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
