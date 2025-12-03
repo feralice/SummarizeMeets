@@ -1,0 +1,20 @@
+<section class="processing" *ngIf="show">
+  <div class="processing-content">
+    <div class="loader"></div>
+    <div class="processing-text">
+      <h3>{{ message }}</h3>
+      <p class="sub-message">{{ subMessage }}</p>
+      <p class="current-stage">{{ currentStage }}</p>
+    </div>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="progress"></div>
+    </div>
+    <div class="progress-info">
+      <span class="progress-text">{{ progress }}%</span>
+      <p class="progress-hint">Não feche esta página - Processamento em andamento</p>
+    </div>
+  </div>
+</section>
