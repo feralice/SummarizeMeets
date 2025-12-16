@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  meetings  Meeting[]
+
+  @@map("users")
+}
+
+model Meeting {
+  id            String   @id @default(uuid())
+  meetingTitle  String
+  meetingDate   DateTime
+  summary       String   @db.Text
+  actionPoints  String   @db.Text
+  notes         String?  @db.Text
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("meetings")
+}
