@@ -34,7 +34,12 @@ export class GeminiProvider {
     }
   }
 
-  async analyzeVideo(videoBuffer: Buffer, mimeType: string, prompt: string, model: string = 'gemini-2.0-flash') {
+  async analyzeVideo(
+    videoBuffer: Buffer,
+    mimeType: string,
+    prompt: string,
+    model: string = 'gemini-2.5-flash'
+  ) {
     const arrayBuffer = bufferToArrayBuffer(videoBuffer);
     const blob = new Blob([arrayBuffer], { type: mimeType });
 

@@ -1,7 +1,6 @@
 import { Filter } from './types';
 
 export const validateVideoMimeType: Filter = (req) => {
-  console.log(`${req.file?.mimetype} TESTEEEE`);
   const file = req.file;
 
   if (!file) {

@@ -4,7 +4,7 @@
   <main class="container">
     <section class="hero">
       <h1>Simplifique suas reuniões</h1>
-      <p>Envie um vídeo e receba um resumo em minutos — powered by Gemini AI</p>
+      <p>Envie um vídeo e receba um resumo em minutos</p>
     </section>
 
     <app-file-uploader
@@ -12,10 +12,18 @@
       (fileSelected)="onFileSelected($event)"
       (fileRemoved)="onFileRemoved()"
       (generateSummary)="onGenerateSummary()"
-    >
-    </app-file-uploader>
+    ></app-file-uploader>
 
-    <!-- Mensagem de erro -->
+    <div *ngIf="selectedFile" class="meeting-title">
+      <label for="meetingTitle">Nome da reunião (opcional)</label>
+      <input
+        id="meetingTitle"
+        type="text"
+        placeholder="Ex: Reunião de Planejamento Q1"
+        [(ngModel)]="meetingTitle"
+      />
+    </div>
+
     <div *ngIf="error" class="error-message">
       <div class="error-icon">⚠️</div>
       <div class="error-content">
@@ -25,23 +33,22 @@
       </div>
     </div>
 
-    <!-- Processando com indicador de progresso -->
     <app-processing-indicator
       *ngIf="showProcessing"
       [message]="'Analisando: ' + (selectedFile?.name || 'seu arquivo')"
       [subMessage]="'O processamento pode levar alguns minutos dependendo do tamanho do arquivo'"
       [currentStage]="currentStage"
       [progress]="progress"
-    >
-    </app-processing-indicator>
+    ></app-processing-indicator>
 
-    <!-- Resultado -->
     <div *ngIf="analysisResult && !showProcessing" class="result-preview">
       <div class="result-header">
         <h3>📋 Resumo Gerado com Sucesso!</h3>
         <span class="success-badge">✅ Pronto</span>
       </div>
+
       <p>{{ analysisResult | slice : 0 : 200 }}...</p>
+
       <div class="result-actions">
         <button class="btn-text" (click)="showFullResult()">📄 Ver resumo completo</button>
         <button class="btn-text" (click)="onFileRemoved()">🗑️ Limpar e fazer novo upload</button>

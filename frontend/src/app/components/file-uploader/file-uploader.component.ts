@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./file-uploader.component.css'],
 })
 export class FileUploaderComponent {
-  @Input() isProcessing: boolean = false; // Agora recebe do pai
+  @Input() isProcessing: boolean = false;
   @Output() fileSelected = new EventEmitter<File>();
   @Output() fileRemoved = new EventEmitter<void>();
   @Output() generateSummary = new EventEmitter<void>();
@@ -45,11 +45,11 @@ export class FileUploaderComponent {
   }
 
   private handleFile(file: File) {
-    const maxSize = 500 * 1024 * 1024;
+    const maxSize = 2 * 1024 * 1024 * 1024;
     const allowedTypes = ['video/', 'audio/'];
 
     if (file.size > maxSize) {
-      alert('Arquivo muito grande. Tamanho máximo: 500MB');
+      alert('Arquivo muito grande. Tamanho máximo: 2GB');
       return;
     }
 

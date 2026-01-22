@@ -5,7 +5,6 @@
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
 >
-  <!-- Sem arquivo -->
   <ng-container *ngIf="!selectedFile && !isProcessing">
     <div class="drop-icon">📁</div>
     <h3 class="drop-title">Arraste seu arquivo aqui</h3>
@@ -24,10 +23,9 @@
       Selecionar arquivo
     </button>
 
-    <p class="file-info-hint">Suporta: MP4, MOV, AVI, MP3 (até 500MB)</p>
+    <p class="file-info-hint">Suporta: MP4, MOV, AVI, MP3 (até 2GB)</p>
   </ng-container>
 
-  <!-- Com arquivo (não processando) -->
   <ng-container *ngIf="selectedFile && !isProcessing">
     <div class="file-info">
       <div class="file-icon">🎥</div>
@@ -50,7 +48,6 @@
     </div>
   </ng-container>
 
-  <!-- Carregando dentro do dropzone -->
   <div *ngIf="isProcessing && selectedFile" class="processing-inline">
     <div class="spinner-small"></div>
     <p>Processando {{ selectedFile.name }}...</p>
