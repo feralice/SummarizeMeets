@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:3000/api
+
+#id do user criado
+@userId = 892a8f6b-391e-48dc-90f3-d77631fbe2a9
+
+### CRIAR USUARIO
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "João",
+  "email": "joao001@email.com",
+  "password": "senha123"
+}
+
+### LISTAR TODOS OS USUARIOS
+GET {{baseUrl}}/users
+
+### BUSCAR USUARIO POR ID
+GET {{baseUrl}}/users/{{userId}}
+
+### ATUALIZAR USUARIO
+PUT {{baseUrl}}/users/{{userId}}
+Content-Type: application/json
+
+{
+  "name": "João Atualizado",
+  "email": "joao@email.com"
+}
+
+### ATUALIZAR A SENHA
+PUT {{baseUrl}}/users/{{userId}}
+Content-Type: application/json
+
+{
+  "password": "novaSenha456"
+}
+
+### DELETAR USUARIO
+DELETE {{baseUrl}}/users/{{userId}}

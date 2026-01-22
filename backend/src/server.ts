@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import videoRouter from './interfaces/http/video-upload.router';
+import userRouter from './interfaces/http/user.router';
 
 dotenv.config();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -16,6 +17,7 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 app.use('/api', videoRouter);
+app.use('/api', userRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
