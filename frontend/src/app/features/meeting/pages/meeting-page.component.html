@@ -14,7 +14,6 @@
     *ngIf="showProcessing"
     [message]="'Analisando: ' + selectedFile?.name"
     [currentStage]="currentStage"
-    [progress]="progress"
   >
   </app-processing-indicator>
 
@@ -25,6 +24,10 @@
 
   <div *ngIf="analysisResult && !showProcessing" class="result-preview">
     <h3>Resumo gerado</h3>
-    <p>{{ analysisResult }}</p>
+    <app-meeting-result
+      *ngIf="analysisResult && showResultModal"
+      [result]="analysisResult"
+      (close)="closeModal()"
+    ></app-meeting-result>
   </div>
 </main>

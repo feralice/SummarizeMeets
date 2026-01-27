@@ -1,0 +1,79 @@
+<div class="modal-backdrop">
+  <div class="modal-card" #modalContent>
+    <header class="modal-header">
+      <div>
+        <h2>Resumo da reunião</h2>
+        <p class="subtitle">Visão geral, decisões e próximos passos</p>
+      </div>
+
+      <div class="header-actions no-print">
+        <button class="export-btn" (click)="exportToPdf()">Exportar PDF</button>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+    </header>
+
+    <!-- INTRO -->
+    <section class="block">
+      <h3>Introdução</h3>
+      <p>{{ result.summary.introduction }}</p>
+    </section>
+
+    <!-- KEY POINTS -->
+    <section class="block">
+      <h3>Pontos principais</h3>
+      <ul class="bullet-list">
+        <li *ngFor="let point of result.summary.key_points">
+          {{ point }}
+        </li>
+      </ul>
+    </section>
+
+    <!-- TOPICS -->
+    <section class="block" *ngIf="result.topics?.length">
+      <h3>Tópicos discutidos</h3>
+
+      <div class="topic-card" *ngFor="let topic of result.topics">
+        <h4>{{ topic.title }}</h4>
+        <p>{{ topic.description }}</p>
+      </div>
+    </section>
+
+    <!-- DECISIONS -->
+    <section class="block" *ngIf="result.decisions.length">
+      <h3>Decisões</h3>
+      <ul class="bullet-list">
+        <li *ngFor="let decision of result.decisions">
+          {{ decision }}
+        </li>
+      </ul>
+    </section>
+
+    <!-- ACTION ITEMS -->
+    <section class="block" *ngIf="result.action_items.length">
+      <h3>Próximos passos</h3>
+
+      <div class="action-item" *ngFor="let item of result.action_items">
+        <p class="task">{{ item.task }}</p>
+
+        <div class="meta">
+          <span *ngIf="item.responsible">
+            {{ item.responsible }}
+          </span>
+          <span *ngIf="item.deadline">
+            {{ item.deadline }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPEAKERS -->
+    <section class="block" *ngIf="result.speakers.length">
+      <h3>Participantes</h3>
+
+      <div class="speaker-card" *ngFor="let speaker of result.speakers">
+        <strong>{{ speaker.speaker }}</strong>
+        <p>{{ speaker.description }}</p>
+      </div>
+    </section>
+  </div>
+</div>

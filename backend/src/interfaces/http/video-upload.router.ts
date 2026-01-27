@@ -15,12 +15,22 @@ videoRouter.post(
       const file = req.file;
       const prompt = req.body.prompt;
 
+      if (!prompt) {
+        return res.status(400).json({ error: 'Prompt is required' });
+      }
+
+      if (!file) {
+        return res.status(400).json({ error: 'Video file is required' });
+      }
+
       const provider = new GeminiProvider(process.env.GEMINI_API_KEY!);
       const usecase = new AnalyzeVideoUseCase(provider);
 
       const result = await usecase.execute(file!.buffer, file!.mimetype, prompt);
 
-      return res.json({ result });
+      return res.status(200).json({
+        data: result,
+      });
     } catch (err: any) {
       return res.status(500).json({ error: err.message });
     }

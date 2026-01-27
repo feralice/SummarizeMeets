@@ -1,0 +1,107 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.no-print {
+  display: block;
+}
+
+.modal-card {
+  background: #ffffff;
+  width: 92%;
+  max-width: 960px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.export-btn {
+  background: #205ef0;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.export-btn:hover {
+  background: #020617;
+}
+
+.close-btn {
+  font-size: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.block {
+  margin-top: 32px;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+h4 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.bullet-list {
+  padding-left: 18px;
+}
+
+.bullet-list li {
+  margin-bottom: 8px;
+}
+
+.topic-card,
+.action-item,
+.speaker-card {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 14px;
+  margin-top: 12px;
+}
+
+.task {
+  font-weight: 500;
+}
+
+.meta {
+  font-size: 13px;
+  color: #475569;
+  margin-top: 6px;
+  display: flex;
+  gap: 16px;
+}

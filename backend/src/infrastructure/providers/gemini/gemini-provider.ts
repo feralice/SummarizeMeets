@@ -1,4 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
+import { extractJson } from 'src/infrastructure/utils/extract-json';
+import { MeetingAnalysisSchema } from 'src/interfaces/schemas/analyze-video.schema';
 
 function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
   const arrayBuffer = new ArrayBuffer(buffer.length);
@@ -27,7 +29,7 @@ export class GeminiProvider {
       }
 
       attempt++;
-      const delay = Math.min(6000 * attempt, 15000);
+      const delay = Math.min(6000 * attempt, 1500);
 
       console.log(`Processing video... (attempt ${attempt})`);
       await new Promise((res) => setTimeout(res, delay));
@@ -38,7 +40,7 @@ export class GeminiProvider {
     videoBuffer: Buffer,
     mimeType: string,
     prompt: string,
-    model: string = 'gemini-2.5-flash'
+    model: string = 'gemini-3-flash'
   ) {
     const arrayBuffer = bufferToArrayBuffer(videoBuffer);
     const blob = new Blob([arrayBuffer], { type: mimeType });
@@ -76,6 +78,14 @@ export class GeminiProvider {
       ],
     });
 
-    return result.text;
+    const rawText = result.text ?? '';
+
+    try {
+      const parsed = extractJson(rawText);
+      return MeetingAnalysisSchema.parse(parsed);
+    } catch (error) {
+      console.error('Gemini response:', rawText);
+      throw new Error('Gemini returned invalid JSON');
+    }
   }
 }
