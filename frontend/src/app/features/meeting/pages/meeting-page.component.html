@@ -1,0 +1,30 @@
+<main class="container">
+  <section class="hero">
+    <h1>Simplifique suas reuniões</h1>
+    <p>Envie um vídeo e receba um resumo em minutos</p>
+  </section>
+
+  <app-file-uploader
+    (fileSelected)="onFileSelected($event)"
+    (generateSummary)="onGenerateSummary()"
+  >
+  </app-file-uploader>
+
+  <app-processing-indicator
+    *ngIf="showProcessing"
+    [message]="'Analisando: ' + selectedFile?.name"
+    [currentStage]="currentStage"
+    [progress]="progress"
+  >
+  </app-processing-indicator>
+
+  <div *ngIf="error" class="error-box">
+    <h3>Erro</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="analysisResult && !showProcessing" class="result-preview">
+    <h3>Resumo gerado</h3>
+    <p>{{ analysisResult }}</p>
+  </div>
+</main>

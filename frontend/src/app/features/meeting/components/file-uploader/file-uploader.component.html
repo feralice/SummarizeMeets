@@ -1,0 +1,26 @@
+<div class="dropzone" *ngIf="!file">
+  <div class="icon">🎬</div>
+
+  <h3>Arraste seu vídeo aqui</h3>
+  <p class="hint">Ou clique para selecionar um arquivo</p>
+
+  <input type="file" hidden #fileInput accept="video/*" (change)="onFileChange($event)" />
+
+  <button class="btn-primary" (click)="fileInput.click()">Selecionar vídeo</button>
+
+  <small class="support-text"> Formatos suportados: MP4, MOV, AVI • Até 2GB </small>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+</div>
+
+<div class="file-preview" *ngIf="file">
+  <div class="file-icon">🎥</div>
+
+  <strong>{{ file?.name }}</strong>
+  <span> {{ (file?.size || 0) / 1024 / 1024 | number: '1.1-1' }} MB </span>
+
+  <div class="actions">
+    <button class="btn-text" (click)="removeFile()">Remover</button>
+    <button class="btn-primary" (click)="generateSummary.emit()">Gerar resumo</button>
+  </div>
+</div>

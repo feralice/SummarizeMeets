@@ -9,9 +9,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./processing-indicator.component.css'],
 })
 export class ProcessingIndicatorComponent {
-  @Input() message: string = 'Processando vídeo com IA...';
-  @Input() subMessage: string = 'Isso pode levar alguns minutos';
-  @Input() currentStage: string = 'Iniciando processamento...';
-  @Input() progress: number = 0;
-  @Input() show: boolean = true;
+  @Input() message = '';
+  @Input() subMessage = '';
+  @Input() currentStage = '';
+  @Input() progress = 0;
 }

@@ -8,14 +8,4 @@ import { CommonModule } from '@angular/common';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
 })
-export class HeaderComponent {
-  onHistoryClick() {
-    console.log('Histórico clicado');
-    // Implementar navegação para histórico
-  }
-
-  onLoginClick() {
-    console.log('Login clicado');
-    // Implementar lógica de login
-  }
-}
+export class HeaderComponent {}

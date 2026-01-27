@@ -1,0 +1,104 @@
+.dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 20px;
+  padding: 48px 32px;
+  text-align: center;
+  background: white;
+  transition: all 0.25s ease;
+  animation: fadeIn 0.4s ease;
+}
+
+.dropzone:hover {
+  border-color: #2563eb;
+  background: #f8fafc;
+}
+
+.dropzone .icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.dropzone h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.dropzone .hint {
+  color: #64748b;
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.support-text {
+  display: block;
+  margin-top: 16px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.error {
+  margin-top: 16px;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+/* PREVIEW */
+
+.file-preview {
+  text-align: center;
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  border: 2px dashed #cbd5e1;
+  animation: fadeInUp 0.4s ease;
+}
+
+.file-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.file-preview strong {
+  display: block;
+  font-size: 16px;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.file-preview span {
+  display: block;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Animações */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { AppComponent } from './app';
 
 export const routes: Routes = [
   {
     path: '',
-    component: AppComponent,
+    loadComponent: () =>
+      import('./features/meeting/pages/meeting-page.component').then((m) => m.MeetingPageComponent),
   },
 ];
