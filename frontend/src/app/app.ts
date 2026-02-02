@@ -7,7 +7,7 @@ import { VideoService } from './services/send-video.service';
 
 //quebrar em mais arquivos aq
 @Component({
-  selector: 'app-root',
+  selector: 'app-main',
   standalone: true,
   imports: [CommonModule, HeaderComponent, FileUploaderComponent, ProcessingIndicatorComponent],
   templateUrl: './app.html',
