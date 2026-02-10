@@ -1,0 +1,111 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1 class="login-title">SummarizeMeets</h1>
+    <p class="login-subtitle">{{ isLoginMode ? 'Entrar' : 'Criar Conta' }}</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Campo de Nome (apenas para registro) -->
+      <div *ngIf="!isLoginMode" class="form-group">
+        <label for="name">Nome Completo</label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          class="form-input"
+          placeholder="Seu nome completo"
+          [class.error]="loginForm.get('name')?.invalid && loginForm.get('name')?.touched"
+        />
+        <span
+          *ngIf="loginForm.get('name')?.invalid && loginForm.get('name')?.touched"
+          class="error-message"
+        >
+          Nome é obrigatório (mínimo 3 caracteres)
+        </span>
+      </div>
+
+      <!-- Campo de Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-input"
+          placeholder="seu.email@exemplo.com"
+          [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+        />
+        <span
+          *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+          class="error-message"
+        >
+          Por favor, insira um email válido
+        </span>
+      </div>
+
+      <!-- Campo de Senha -->
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          class="form-input"
+          placeholder="Sua senha"
+          [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+        />
+        <span
+          *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          class="error-message"
+        >
+          Senha é obrigatória (mínimo 6 caracteres)
+        </span>
+      </div>
+
+      <!-- Campo de Confirmar Senha (apenas para registro) -->
+      <div *ngIf="!isLoginMode" class="form-group">
+        <label for="confirmPassword">Confirmar Senha</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+          class="form-input"
+          placeholder="Confirme sua senha"
+          [class.error]="
+            loginForm.get('confirmPassword')?.invalid && loginForm.get('confirmPassword')?.touched
+          "
+        />
+        <span
+          *ngIf="
+            loginForm.get('confirmPassword')?.invalid && loginForm.get('confirmPassword')?.touched
+          "
+          class="error-message"
+        >
+          Por favor, confirme sua senha
+        </span>
+      </div>
+
+      <!-- Mensagem de Erro -->
+      <div *ngIf="error" class="error-alert">
+        <span>{{ error }}</span>
+      </div>
+
+      <!-- Botão de Envio -->
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="loginForm.invalid || isLoading"
+        [class.loading]="isLoading"
+      >
+        {{ isLoading ? 'Processando...' : isLoginMode ? 'Entrar' : 'Criar Conta' }}
+      </button>
+    </form>
+
+    <!-- Alternador de Modo -->
+    <div class="mode-toggle">
+      <span>{{ isLoginMode ? 'Não tem conta?' : 'Já tem conta?' }}</span>
+      <button type="button" class="toggle-btn" (click)="toggleMode()" [disabled]="isLoading">
+        {{ isLoginMode ? 'Registre-se' : 'Entrar' }}
+      </button>
+    </div>
+  </div>
+</div>
