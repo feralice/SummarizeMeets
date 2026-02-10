@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { extractJson } from 'src/infrastructure/utils/extract-json';
-import { MeetingAnalysisSchema } from 'src/interfaces/schemas/analyze-video.schema';
+import { MeetingAnalysisSchema } from 'src/interfaces/schemas/analyze-media.schema';
 
 function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
   const arrayBuffer = new ArrayBuffer(buffer.length);
@@ -31,18 +31,18 @@ export class GeminiProvider {
       attempt++;
       const delay = Math.min(6000 * attempt, 1500);
 
-      console.log(`Processing video... (attempt ${attempt})`);
+      console.log(`Processing media file... (attempt ${attempt})`);
       await new Promise((res) => setTimeout(res, delay));
     }
   }
 
-  async analyzeVideo(
-    videoBuffer: Buffer,
+  async analyzeMedia(
+    mediaBuffer: Buffer,
     mimeType: string,
     prompt: string,
     model: string = 'gemini-3-flash'
   ) {
-    const arrayBuffer = bufferToArrayBuffer(videoBuffer);
+    const arrayBuffer = bufferToArrayBuffer(mediaBuffer);
     const blob = new Blob([arrayBuffer], { type: mimeType });
 
     const uploaded = await this.ai.files.upload({
@@ -50,7 +50,7 @@ export class GeminiProvider {
       config: { mimeType },
     });
 
-    console.log('Video uploaded:', uploaded.name);
+    console.log('Media uploaded:', uploaded.name);
 
     if (!uploaded.name) {
       throw new Error("File upload did not return a 'name' property");
@@ -58,7 +58,7 @@ export class GeminiProvider {
 
     const activeFile = await this.waitForFileActive(uploaded.name);
 
-    console.log('Video processed and active!');
+    console.log('Media file processed and active!');
 
     const result = await this.ai.models.generateContent({
       model,

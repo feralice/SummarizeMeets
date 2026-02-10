@@ -3,7 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import videoRouter from './interfaces/http/video-upload.router';
+import mediaRouter from './interfaces/http/media-upload.router';
 import userRouter from './interfaces/http/user.router';
 
 dotenv.config();
@@ -16,7 +16,7 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
-app.use('/api', videoRouter);
+app.use('/api', mediaRouter);
 app.use('/api', userRouter);
 
 app.listen(PORT, () => {

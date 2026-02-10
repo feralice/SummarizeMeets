@@ -1,14 +1,14 @@
 <div class="dropzone" *ngIf="!file">
   <div class="icon">🎬</div>
 
-  <h3>Arraste seu vídeo aqui</h3>
+  <h3>Arraste seu vídeo ou áudio aqui</h3>
   <p class="hint">Ou clique para selecionar um arquivo</p>
 
-  <input type="file" hidden #fileInput accept="video/*" (change)="onFileChange($event)" />
+  <input type="file" hidden #fileInput accept="video/*,audio/*" (change)="onFileChange($event)" />
 
-  <button class="btn-primary" (click)="fileInput.click()">Selecionar vídeo</button>
+  <button class="btn-primary" (click)="fileInput.click()">Selecionar arquivo</button>
 
-  <small class="support-text"> Formatos suportados: MP4, MOV, AVI • Até 2GB </small>
+  <small class="support-text"> Formatos suportados: MP4, MOV, AVI, MP3, WAV • Até 2GB </small>
 
   <p class="error" *ngIf="error">{{ error }}</p>
 </div>

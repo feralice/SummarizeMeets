@@ -13,7 +13,7 @@ If any rule is violated, the response is invalid.
 ---
 
 INPUT
-You will receive content extracted from an audio/video meeting recording.
+You will receive content extracted from an audio or video meeting recording.
 
 GOAL
 Produce a detailed, operational meeting analysis that is useful to execute work afterward.

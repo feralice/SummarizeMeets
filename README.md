@@ -1,4 +1,5 @@
 # SummarizeMeets
+
 MotoAcademy grupo 4
 
 Plataforma web que transforma gravações de reuniões em resumos, decisões e itens de ação usando IA generativa.
@@ -76,19 +77,19 @@ SummarizeMeets/
 
 ### Usuários
 
-| Método   | Rota              | Descrição         |
-| -------- | ----------------- | ----------------- |
-| `POST`   | `/api/users`      | Criar usuário     |
-| `GET`    | `/api/users`      | Listar usuários   |
-| `GET`    | `/api/users/:id`  | Buscar por ID     |
-| `PUT`    | `/api/users/:id`  | Atualizar usuário |
-| `DELETE` | `/api/users/:id`  | Deletar usuário   |
+| Método   | Rota             | Descrição         |
+| -------- | ---------------- | ----------------- |
+| `POST`   | `/api/users`     | Criar usuário     |
+| `GET`    | `/api/users`     | Listar usuários   |
+| `GET`    | `/api/users/:id` | Buscar por ID     |
+| `PUT`    | `/api/users/:id` | Atualizar usuário |
+| `DELETE` | `/api/users/:id` | Deletar usuário   |
 
-### Vídeo
+### Mídia
 
-| Método | Rota                 | Descrição          |
-| ------ | -------------------- | ------------------ |
-| `POST` | `/api/analyze-video` | Analisar vídeo     |
+| Método | Rota                 | Descrição            |
+| ------ | -------------------- | -------------------- |
+| `POST` | `/api/analyze-media` | Analisar áudio/vídeo |
 
 ## Tecnologias
 
@@ -100,11 +101,11 @@ SummarizeMeets/
 
 ## Variáveis de Ambiente
 
-| Variável         | Descrição                        |
-| ---------------- | -------------------------------- |
-| `DATABASE_URL`   | URL de conexão com o PostgreSQL  |
-| `GEMINI_API_KEY` | Chave da API do Google Gemini    |
-| `PORT`           | Porta do servidor                |
+| Variável         | Descrição                       |
+| ---------------- | ------------------------------- |
+| `DATABASE_URL`   | URL de conexão com o PostgreSQL |
+| `GEMINI_API_KEY` | Chave da API do Google Gemini   |
+| `PORT`           | Porta do servidor               |
 
 ## Documentação
 

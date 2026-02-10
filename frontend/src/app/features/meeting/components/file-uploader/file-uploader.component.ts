@@ -25,14 +25,17 @@ export class FileUploaderComponent {
 
     const file = input.files[0];
 
-    if (!file.type.startsWith('video/')) {
-      this.error = 'Por favor, selecione um arquivo de vídeo.';
+    const isVideo = file.type.startsWith('video/');
+    const isAudio = file.type.startsWith('audio/');
+
+    if (!isVideo && !isAudio) {
+      this.error = 'Por favor, selecione um arquivo de vídeo ou áudio.';
       return;
     }
 
     const sizeMB = file.size / 1024 / 1024;
     if (sizeMB > this.MAX_SIZE_MB) {
-      this.error = 'O vídeo deve ter no máximo 2GB.';
+      this.error = 'O arquivo deve ter no máximo 2GB.';
       return;
     }
 
