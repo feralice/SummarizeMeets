@@ -1,0 +1,22 @@
+<div class="history-page">
+  <h2>Histórico de Reuniões</h2>
+
+  <div *ngIf="loading">Carregando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <ul *ngIf="!loading && meetings.length === 0">
+    Nenhuma reunião encontrada.
+  </ul>
+
+  <div *ngIf="meetings.length > 0" class="meetings-list">
+    <div *ngFor="let m of meetings" class="meeting-card">
+      <h3>{{ m.meetingTitle }}</h3>
+      <div class="meta">
+        {{ m.meetingDate | date: 'short' }} — <strong>{{ m.status }}</strong>
+      </div>
+      <p class="summary">{{ m.summary }}</p>
+      <p class="actions"><strong>Action points:</strong> {{ m.actionPoints }}</p>
+      <p *ngIf="m.notes"><strong>Notes:</strong> {{ m.notes }}</p>
+    </div>
+  </div>
+</div>

@@ -30,8 +30,7 @@ export class HeaderComponent implements OnInit {
   }
 
   onHistoryClick() {
-    console.log('Histórico clicado');
-    // futuramente: this.router.navigate(['/history']);
+    this.router.navigate(['/history']);
   }
 
   onLoginClick() {

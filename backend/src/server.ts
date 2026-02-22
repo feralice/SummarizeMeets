@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import mediaRouter from './interfaces/http/media-upload.router';
 import userRouter from './interfaces/http/user.router';
+import meetingsRouter from './interfaces/http/meetings.router';
 
 dotenv.config();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -18,6 +19,7 @@ app.use(morgan('dev'));
 
 app.use('/api', mediaRouter);
 app.use('/api', userRouter);
+app.use('/api', meetingsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
