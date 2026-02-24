@@ -40,7 +40,7 @@ export class GeminiProvider {
     mediaBuffer: Buffer,
     mimeType: string,
     prompt: string,
-    model: string = 'gemini-3-flash'
+    model: string = 'gemini-3-flash-preview'
   ) {
     const arrayBuffer = bufferToArrayBuffer(mediaBuffer);
     const blob = new Blob([arrayBuffer], { type: mimeType });

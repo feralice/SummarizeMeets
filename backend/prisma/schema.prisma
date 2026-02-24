@@ -15,24 +15,26 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  meetings  Meeting[]
+  meetings Meeting[]
 
   @@map("users")
 }
 
 model Meeting {
-  id            String   @id @default(uuid())
-  meetingTitle  String
-  meetingDate   DateTime
-  summary       String   @db.Text
-  actionPoints  String   @db.Text
-  notes         String?  @db.Text
-  status        String   @default("pending")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userId        String
+  id           String   @id @default(uuid())
+  meetingTitle String
+  meetingDate  DateTime
+  summary      Json
+  topics       Json
+  decisions    Json
+  actionItems  Json
+  speakers     Json
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("meetings")
 }

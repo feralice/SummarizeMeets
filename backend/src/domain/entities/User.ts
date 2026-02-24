@@ -14,6 +14,16 @@ export class User {
     this.props = props;
   }
 
+  toJSON() {
+    return {
+      id: this.props.id,
+      name: this.props.name,
+      email: this.props.email,
+      createdAt: this.props.createdAt,
+      updatedAt: this.props.updatedAt,
+    };
+  }
+
   get id(): string | undefined {
     return this.props.id;
   }

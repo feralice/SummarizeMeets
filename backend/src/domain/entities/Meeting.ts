@@ -2,9 +2,11 @@ export interface MeetingProps {
   id?: string;
   meetingTitle: string;
   meetingDate: Date;
-  summary: string;
-  actionPoints: string;
-  notes?: string;
+  summary: any;
+  topics: any[];
+  decisions: string[];
+  actionItems: any[];
+  speakers: any[];
   status: string;
   userId: string;
   createdAt?: Date;
@@ -21,6 +23,23 @@ export class Meeting {
     };
   }
 
+  toJSON() {
+    return {
+      id: this.props.id,
+      meetingTitle: this.props.meetingTitle,
+      meetingDate: this.props.meetingDate,
+      summary: this.props.summary,
+      topics: this.props.topics,
+      decisions: this.props.decisions,
+      actionItems: this.props.actionItems,
+      speakers: this.props.speakers,
+      status: this.props.status,
+      userId: this.props.userId,
+      createdAt: this.props.createdAt,
+      updatedAt: this.props.updatedAt,
+    };
+  }
+
   get id(): string | undefined {
     return this.props.id;
   }
@@ -33,16 +52,24 @@ export class Meeting {
     return this.props.meetingDate;
   }
 
-  get summary(): string {
+  get summary(): any {
     return this.props.summary;
   }
 
-  get actionPoints(): string {
-    return this.props.actionPoints;
+  get topics(): any[] {
+    return this.props.topics;
   }
 
-  get notes(): string | undefined {
-    return this.props.notes;
+  get decisions(): string[] {
+    return this.props.decisions;
+  }
+
+  get actionItems(): any[] {
+    return this.props.actionItems;
+  }
+
+  get speakers(): any[] {
+    return this.props.speakers;
   }
 
   get status(): string {

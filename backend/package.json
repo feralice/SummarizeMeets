@@ -8,7 +8,15 @@
     "compile": "npx tsc",
     "start": "node ./dist/server.js",
     "test:db": "ts-node tests/test-prisma.ts",
-    "format": "prettier --write \"{src,prisma,tests,docs}/**/*.{ts,tsx,js,json,md}\" \"*.md\""
+    "format": "prettier --write \"{src,prisma,tests,docs}/**/*.{ts,tsx,js,json,md}\" \"*.md\"",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:deploy": "prisma deploy",
+    "db:setup": "./scripts/setup-db.sh"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seeds/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +31,7 @@
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
+    "pg": "^8.18.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

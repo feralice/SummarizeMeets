@@ -1,0 +1,122 @@
+<div class="details-container">
+  <header class="details-header no-print">
+    <a routerLink="/history" class="btn-back">← Voltar para o Histórico</a>
+    <div class="header-main">
+      <h1>{{ meeting?.meetingTitle }}</h1>
+      <p class="date">{{ meeting?.meetingDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+    </div>
+  </header>
+
+  @if (loading) {
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Carregando detalhes...</p>
+  </div>
+  }
+
+  @if (error) {
+  <div class="error-state">
+    <p>{{ error }}</p>
+    <a routerLink="/history" class="btn-primary">Voltar ao Histórico</a>
+  </div>
+  }
+
+  @if (!loading && meeting) {
+  <div class="analysis-content">
+    <div class="card">
+      <!-- SUMMARY -->
+      @if (meeting.summary) {
+      <section class="block">
+        <h3>Resumo</h3>
+        <p class="introduction">{{ meeting.summary.introduction }}</p>
+
+        @if (meeting.summary.key_points) {
+        <div class="key-points">
+          <h4>Pontos Principais</h4>
+          <ul class="bullet-list">
+            @for (point of meeting.summary.key_points; track $index) {
+            <li>
+              {{ point }}
+            </li>
+            }
+          </ul>
+        </div>
+        }
+
+        <p class="conclusion">{{ meeting.summary.conclusion }}</p>
+      </section>
+      }
+
+      <!-- TOPICS -->
+      @if (meeting.topics?.length) {
+      <section class="block">
+        <h3>Tópicos Discutidos</h3>
+        <div class="topic-grid">
+          @for (topic of meeting.topics; track $index) {
+          <div class="topic-card">
+            <h4>{{ topic.title }}</h4>
+            <p>{{ topic.description }}</p>
+          </div>
+          }
+        </div>
+      </section>
+      }
+
+      <!-- DECISIONS -->
+      @if (meeting.decisions?.length) {
+      <section class="block">
+        <h3>Decisões Tomadas</h3>
+        <ul class="bullet-list">
+          @for (decision of meeting.decisions; track $index) {
+          <li>
+            {{ decision }}
+          </li>
+          }
+        </ul>
+      </section>
+      }
+
+      <!-- ACTION ITEMS -->
+      @if (meeting.actionItems?.length) {
+      <section class="block">
+        <h3>Próximos Passos</h3>
+        <div class="action-grid">
+          @for (item of meeting.actionItems; track $index) {
+          <div class="action-item">
+            <p class="task">{{ item.task }}</p>
+            <div class="meta">
+              @if (item.responsible) {
+              <span class="badge responsible">
+                👤 {{ item.responsible }}
+              </span>
+              }
+              @if (item.deadline) {
+              <span class="badge deadline">
+                📅 {{ item.deadline }}
+              </span>
+              }
+            </div>
+          </div>
+          }
+        </div>
+      </section>
+      }
+
+      <!-- SPEAKERS -->
+      @if (meeting.speakers?.length) {
+      <section class="block">
+        <h3>Participantes</h3>
+        <div class="speaker-grid">
+          @for (speaker of meeting.speakers; track $index) {
+          <div class="speaker-card">
+            <strong>{{ speaker.speaker }}</strong>
+            <p>{{ speaker.description }}</p>
+          </div>
+          }
+        </div>
+      </section>
+      }
+    </div>
+  </div>
+  }
+</div>

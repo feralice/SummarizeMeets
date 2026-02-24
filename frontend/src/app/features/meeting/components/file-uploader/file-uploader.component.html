@@ -16,8 +16,8 @@
 <div class="file-preview" *ngIf="file">
   <div class="file-icon">🎥</div>
 
-  <strong>{{ file?.name }}</strong>
-  <span> {{ (file?.size || 0) / 1024 / 1024 | number: '1.1-1' }} MB </span>
+  <strong>{{ file.name }}</strong>
+  <span> {{ (file.size || 0) / 1024 / 1024 | number: '1.1-1' }} MB </span>
 
   <div class="actions">
     <button class="btn-text" (click)="removeFile()">Remover</button>

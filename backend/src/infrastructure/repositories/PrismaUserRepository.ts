@@ -6,6 +6,7 @@ export class PrismaUserRepository implements IUserRepository {
   async create(user: User): Promise<User> {
     const createdUser = await prisma.user.create({
       data: {
+        id: user.id, // Permitindo ID personalizado (UUID do frontend)
         name: user.name,
         email: user.email.toLowerCase(),
         password: user.password,

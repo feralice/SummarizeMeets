@@ -1,19 +1,12 @@
 <header class="navbar">
-  <div class="brand">
+  <div class="brand" routerLink="/" style="cursor: pointer;">
     <span class="title">SummarizeMeets</span>
   </div>
 
   <div class="nav-actions">
-    <!-- Histórico só aparece se logado -->
-    <button *ngIf="isAuthenticated" class="btn-text" (click)="onHistoryClick()">Histórico</button>
-
-    <!-- Info do usuário + logout -->
-    <div *ngIf="isAuthenticated" class="user-info">
-      <span class="user-name">{{ currentUser?.name }}</span>
-      <button class="btn-danger" (click)="onLogout()">Sair</button>
-    </div>
-
-    <!-- Login só aparece se NÃO logado -->
-    <button *ngIf="!isAuthenticated" class="btn-primary" (click)="onLoginClick()">Login</button>
+    <a routerLink="/" class="btn-text" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Nova
+      Análise</a>
+    <a routerLink="/history" class="btn-text" routerLinkActive="active">Histórico</a>
+    <button class="btn-primary">Login</button>
   </div>
 </header>
