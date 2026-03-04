@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import { upload } from 'src/config/multer';
 import { GeminiProvider } from 'src/infrastructure/providers/gemini/gemini-provider';
-import { AnalyzeMediaUseCase } from 'src/use-cases/analyze-media/analyze-media';
 import { withFilters } from './filters/with-filters';
-import { validateVideoMimeType } from './filters/validade-video-type';
 import { PrismaMeetingRepository } from 'src/infrastructure/repositories/PrismaMeetingRepository';
 import { PrismaUserRepository } from 'src/infrastructure/repositories/PrismaUserRepository';
+import { validateMediaMimeType } from './filters/validate-media-type';
 
 const mediaRouter = Router();
 
