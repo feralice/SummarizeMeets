@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import mediaRouter from './interfaces/http/media-upload.router';
 import userRouter from './interfaces/http/user.router';
 import meetingRouter from './interfaces/http/meeting.router';
+import authRouter from './interfaces/http/auth.router';
 
 dotenv.config();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -17,6 +18,7 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
+app.use('/api', authRouter);
 app.use('/api', mediaRouter);
 app.use('/api', userRouter);
 app.use('/api/meetings', meetingRouter);

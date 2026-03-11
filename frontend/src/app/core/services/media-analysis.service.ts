@@ -24,7 +24,7 @@ export class VideoService {
     formData.append('userId', userId);
     formData.append('title', file.name.split('.')[0]);
 
-    return this.http.post<{ data: MeetingAnalysis & { id: string } }>(`${this.apiUrl}/analyze-video`, formData).pipe(
+    return this.http.post<{ data: MeetingAnalysis & { id: string } }>(`${this.apiUrl}/analyze-media`, formData).pipe(
       map((res) => res.data),
       catchError(this.handleError),
     );

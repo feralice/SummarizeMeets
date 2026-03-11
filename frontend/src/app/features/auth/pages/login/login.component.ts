@@ -96,7 +96,7 @@ export class LoginComponent implements OnInit {
       },
       error: (error) => {
         console.error('[Login Component] ❌ Erro de autenticação:', error);
-        this.error = error.error?.message || 'Erro ao processar solicitação. Tente novamente.';
+        this.error = error.error?.error || error.error?.message || 'Erro ao processar solicitação. Tente novamente.';
         this.isLoading = false;
       },
     });

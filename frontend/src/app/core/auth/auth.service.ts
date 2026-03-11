@@ -39,22 +39,21 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials).pipe(
-      tap((response) => {
-        this.setToken(response.token);
-        this.currentUserSubject.next(response.user);
-        this.isAuthenticatedSubject.next(true);
-      }),
+      tap((response) => this.setSession(response)),
     );
   }
 
   register(data: RegisterRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/register`, data).pipe(
-      tap((response) => {
-        this.setToken(response.token);
-        this.currentUserSubject.next(response.user);
-        this.isAuthenticatedSubject.next(true);
-      }),
+      tap((response) => this.setSession(response)),
     );
+  }
+
+  private setSession(response: LoginResponse): void {
+    localStorage.setItem('auth_token', response.token);
+    localStorage.setItem('user', JSON.stringify(response.user));
+    this.currentUserSubject.next(response.user);
+    this.isAuthenticatedSubject.next(true);
   }
 
   logout(): void {

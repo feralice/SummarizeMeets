@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MediaAnalysisService } from '../../../core/services/media-analysis.service';
+import { VideoService } from '../../../core/services/media-analysis.service';
 import { FileUploaderComponent } from '../components/file-uploader/file-uploader.component';
 import { ProcessingIndicatorComponent } from '../components/processing-indicator/processing-indicator.component';
 import { MeetingResultComponent } from '../components/meeting-result/meeting-result.component';
@@ -28,7 +28,7 @@ export class MeetingPageComponent {
   error: string | null = null;
   showResultModal = false;
 
-  constructor(private mediaService: MediaAnalysisService) {}
+  constructor(private mediaService: VideoService) {}
 
   onFileSelected(file: File) {
     this.selectedFile = file;
@@ -47,7 +47,7 @@ export class MeetingPageComponent {
     this.showProcessing = true;
     this.currentStage = 'Enviando arquivo...';
 
-    this.mediaService.analyzeMedia(this.selectedFile).subscribe({
+    this.mediaService.analyzeVideo(this.selectedFile).subscribe({
       next: (res) => {
         this.analysisResult = res;
         this.showProcessing = false;

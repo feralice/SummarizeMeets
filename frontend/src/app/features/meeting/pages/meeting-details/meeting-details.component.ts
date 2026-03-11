@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { VideoService } from '../../../../core/services/send-video.service';
+import { VideoService } from '../../../../core/services/media-analysis.service';
 import { Meeting } from '../../../../core/models/meeting.model';
 
 @Component({

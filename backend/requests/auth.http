@@ -1,0 +1,50 @@
+@baseUrl = http://localhost:3000/api
+
+# Cole o token retornado pelo login/register aqui para usar nas outras requests
+@token =
+
+### CADASTRAR USUARIO
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "João",
+  "email": "joao@email.com",
+  "password": "senha123"
+}
+
+### LOGIN
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@email.com",
+  "password": "senha123"
+}
+
+### LOGIN - credenciais inválidas (deve retornar 401)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@email.com",
+  "password": "senhaerrada"
+}
+
+### CADASTRAR - email duplicado (deve retornar 409)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "João",
+  "email": "joao@email.com",
+  "password": "senha123"
+}
+
+### CADASTRAR - campos faltando (deve retornar 400)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "joao@email.com"
+}
