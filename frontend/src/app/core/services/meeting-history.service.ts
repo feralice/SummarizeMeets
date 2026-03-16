@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -7,9 +7,11 @@ export interface MeetingDto {
   id?: string;
   meetingTitle: string;
   meetingDate: string;
-  summary: string;
-  actionPoints: string;
-  notes?: string;
+  summary: any;
+  topics: any[];
+  decisions: string[];
+  actionItems: any[];
+  speakers: any[];
   status: string;
   userId: string;
   createdAt?: string;
@@ -22,9 +24,8 @@ export class MeetingHistoryService {
 
   constructor(private http: HttpClient) {}
 
-  getHistory(userId: string): Observable<MeetingDto[]> {
-    const params = new HttpParams().set('userId', userId);
-    return this.http.get<MeetingDto[]>(this.apiUrl, { params }).pipe(
+  getHistory(): Observable<MeetingDto[]> {
+    return this.http.get<MeetingDto[]>(this.apiUrl).pipe(
       map((res) => res || []),
       catchError(this.handleError),
     );

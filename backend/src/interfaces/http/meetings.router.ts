@@ -1,29 +1,28 @@
 import { Router } from 'express';
 import { PrismaMeetingRepository } from '../../infrastructure/repositories/PrismaMeetingRepository';
 import { ListMeetingsByUserUseCase } from '../../use-cases/meetings/list-by-user';
+import { authMiddleware } from './middleware/auth.middleware';
 
 const meetingsRouter = Router();
 const meetingRepository = new PrismaMeetingRepository();
 
-// GET /api/history?userId=<id>
-meetingsRouter.get('/history', async (req, res) => {
+// GET /api/history
+meetingsRouter.get('/history', authMiddleware, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
-
-    if (!userId) {
-      return res.status(400).json({ error: 'userId query parameter is required' });
-    }
+    const userId = req.userId;
 
     const useCase = new ListMeetingsByUserUseCase(meetingRepository);
-    const meetings = await useCase.execute(userId);
+    const meetings = await useCase.execute(userId!);
 
     const result = meetings.map((meeting) => ({
       id: meeting.id,
       meetingTitle: meeting.meetingTitle,
       meetingDate: meeting.meetingDate,
       summary: meeting.summary,
-      actionPoints: meeting.actionPoints,
-      notes: meeting.notes,
+      topics: meeting.topics,
+      decisions: meeting.decisions,
+      actionItems: meeting.actionItems,
+      speakers: meeting.speakers,
       status: meeting.status,
       userId: meeting.userId,
       createdAt: meeting.createdAt,

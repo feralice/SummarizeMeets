@@ -27,7 +27,7 @@ export class AnalyzeVideoUseCase {
       }));
     }
 
-    const result = await this.provider.analyzeVideo(video, mime, prompt);
+    const result = await this.provider.analyzeMedia(video, mime, prompt);
 
     const meeting = new Meeting({
       meetingTitle: title || 'Nova Reunião',

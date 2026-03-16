@@ -14,9 +14,8 @@
       <div class="meta">
         {{ m.meetingDate | date: 'short' }} — <strong>{{ m.status }}</strong>
       </div>
-      <p class="summary">{{ m.summary }}</p>
-      <p class="actions"><strong>Action points:</strong> {{ m.actionPoints }}</p>
-      <p *ngIf="m.notes"><strong>Notes:</strong> {{ m.notes }}</p>
+      <p class="summary">{{ m.summary | json }}</p>
+      <p *ngIf="m.decisions?.length" class="actions"><strong>Decisions:</strong> {{ m.decisions.join(', ') }}</p>
     </div>
   </div>
 </div>

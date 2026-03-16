@@ -2,12 +2,18 @@ import { Router } from 'express';
 import { PrismaMeetingRepository } from 'src/infrastructure/repositories/PrismaMeetingRepository';
 import { ListUserMeetingsUseCase } from 'src/use-cases/meetings/list-user-meetings';
 import { GetMeetingDetailsUseCase } from 'src/use-cases/meetings/get-meeting-details';
+import { authMiddleware } from './middleware/auth.middleware';
 
 const meetingRouter = Router();
 
-meetingRouter.get('/user/:userId', async (req, res) => {
+meetingRouter.get('/user/:userId', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
+
+    if (userId !== req.userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     const meetingRepository = new PrismaMeetingRepository();
     const usecase = new ListUserMeetingsUseCase(meetingRepository);
 
@@ -21,9 +27,9 @@ meetingRouter.get('/user/:userId', async (req, res) => {
   }
 });
 
-meetingRouter.get('/:id', async (req, res) => {
+meetingRouter.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params['id'] as string;
     const meetingRepository = new PrismaMeetingRepository();
     const usecase = new GetMeetingDetailsUseCase(meetingRepository);
 

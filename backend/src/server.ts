@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import mediaRouter from './interfaces/http/media-upload.router';
 import userRouter from './interfaces/http/user.router';
 import meetingRouter from './interfaces/http/meeting.router';
+import meetingsRouter from './interfaces/http/meetings.router';
 import authRouter from './interfaces/http/auth.router';
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(morgan('dev'));
 app.use('/api', authRouter);
 app.use('/api', mediaRouter);
 app.use('/api', userRouter);
+app.use('/api', meetingsRouter);
 app.use('/api/meetings', meetingRouter);
 
 app.listen(PORT, () => {

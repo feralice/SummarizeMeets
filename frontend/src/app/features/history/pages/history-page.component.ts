@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MeetingHistoryService, MeetingDto } from '../../../core/services/meeting-history.service';
-import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-history-page',
@@ -15,23 +14,16 @@ export class HistoryPageComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  constructor(
-    private historyService: MeetingHistoryService,
-    private auth: AuthService,
-  ) {}
+  constructor(private historyService: MeetingHistoryService) {}
 
   ngOnInit(): void {
-    this.auth.currentUser$.subscribe((user) => {
-      if (user?.id) {
-        this.loadHistory(user.id);
-      }
-    });
+    this.loadHistory();
   }
 
-  loadHistory(userId: string) {
+  loadHistory() {
     this.loading = true;
     this.error = null;
-    this.historyService.getHistory(userId).subscribe({
+    this.historyService.getHistory().subscribe({
       next: (res) => {
         this.meetings = res;
         this.loading = false;

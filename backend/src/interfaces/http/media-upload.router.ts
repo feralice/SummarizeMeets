@@ -5,16 +5,20 @@ import { withFilters } from './filters/with-filters';
 import { PrismaMeetingRepository } from 'src/infrastructure/repositories/PrismaMeetingRepository';
 import { PrismaUserRepository } from 'src/infrastructure/repositories/PrismaUserRepository';
 import { validateMediaMimeType } from './filters/validate-media-type';
+import { authMiddleware } from './middleware/auth.middleware';
+import { AnalyzeVideoUseCase } from 'src/use-cases/analyze-video/analyze-video';
 
 const mediaRouter = Router();
 
 mediaRouter.post(
   '/analyze-media',
+  authMiddleware,
   upload.single('media'),
   withFilters([validateMediaMimeType], async (req, res) => {
     try {
       const file = req.file;
-      const { prompt, userId, title } = req.body;
+      const { prompt, title } = req.body;
+      const userId = req.userId!;
 
       if (!prompt) {
         return res.status(400).json({ error: 'Prompt is required' });
@@ -22,10 +26,6 @@ mediaRouter.post(
 
       if (!file) {
         return res.status(400).json({ error: 'Video file is required' });
-      }
-
-      if (!userId) {
-        return res.status(400).json({ error: 'UserId is required' });
       }
 
       const provider = new GeminiProvider(process.env.GEMINI_API_KEY!);
