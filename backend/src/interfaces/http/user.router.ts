@@ -5,6 +5,7 @@ import { ListUsersUseCase } from '../../use-cases/users/list-users';
 import { FindUserUseCase } from '../../use-cases/users/find-user';
 import { UpdateUserUseCase } from '../../use-cases/users/update-user';
 import { DeleteUserUseCase } from '../../use-cases/users/delete-user';
+import { constants as HttpStatus } from 'node:http2';
 
 const userRouter = Router();
 const userRepository = new PrismaUserRepository();
@@ -15,7 +16,7 @@ userRouter.post('/users', async (req, res) => {
     const useCase = new CreateUserUseCase(userRepository);
     const user = await useCase.execute({ name, email, password });
 
-    return res.status(201).json({
+    return res.status(HttpStatus.HTTP_STATUS_CREATED).json({
       id: user.id,
       name: user.name,
       email: user.email,
@@ -23,12 +24,12 @@ userRouter.post('/users', async (req, res) => {
     });
   } catch (err: any) {
     if (err.message === 'Email already in use') {
-      return res.status(409).json({ error: err.message });
+      return res.status(HttpStatus.HTTP_STATUS_CONFLICT).json({ error: err.message });
     }
     if (err.message === 'Name, email and password are required') {
-      return res.status(400).json({ error: err.message });
+      return res.status(HttpStatus.HTTP_STATUS_BAD_REQUEST).json({ error: err.message });
     }
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
 });
 
@@ -46,7 +47,7 @@ userRouter.get('/users', async (_req, res) => {
 
     return res.json(result);
   } catch (err: any) {
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
 });
 
@@ -57,7 +58,7 @@ userRouter.get('/users/:id', async (req, res) => {
     const user = await useCase.execute(id);
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(HttpStatus.HTTP_STATUS_NOT_FOUND).json({ error: 'User not found' });
     }
 
     return res.json({
@@ -68,7 +69,7 @@ userRouter.get('/users/:id', async (req, res) => {
       updatedAt: user.updatedAt,
     });
   } catch (err: any) {
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
 });
 
@@ -87,12 +88,12 @@ userRouter.put('/users/:id', async (req, res) => {
     });
   } catch (err: any) {
     if (err.message === 'User not found') {
-      return res.status(404).json({ error: err.message });
+      return res.status(HttpStatus.HTTP_STATUS_NOT_FOUND).json({ error: err.message });
     }
     if (err.message === 'Email already in use') {
-      return res.status(409).json({ error: err.message });
+      return res.status(HttpStatus.HTTP_STATUS_CONFLICT).json({ error: err.message });
     }
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
 });
 
@@ -102,12 +103,12 @@ userRouter.delete('/users/:id', async (req, res) => {
     const useCase = new DeleteUserUseCase(userRepository);
     await useCase.execute(id);
 
-    return res.status(204).send();
+    return res.status(HttpStatus.HTTP_STATUS_NO_CONTENT).send();
   } catch (err: any) {
     if (err.message === 'User not found') {
-      return res.status(404).json({ error: err.message });
+      return res.status(HttpStatus.HTTP_STATUS_NOT_FOUND).json({ error: err.message });
     }
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
 });
 

@@ -8,6 +8,7 @@ import userRouter from './interfaces/http/user.router';
 import meetingRouter from './interfaces/http/meeting.router';
 import meetingsRouter from './interfaces/http/meetings.router';
 import authRouter from './interfaces/http/auth.router';
+import logger from './infrastructure/logger';
 
 dotenv.config();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -26,5 +27,5 @@ app.use('/api', meetingsRouter);
 app.use('/api/meetings', meetingRouter);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' }, 'Server started');
 });

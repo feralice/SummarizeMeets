@@ -1,4 +1,4 @@
-import { User } from '../../domain/entities/User';
+import { User, UserProps } from '../../domain/entities/User';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { prisma } from '../database/prisma';
 
@@ -77,7 +77,7 @@ export class PrismaUserRepository implements IUserRepository {
 
   async update(
     id: string,
-    data: Partial<Pick<User, 'name' | 'email' | 'password'>>,
+    data: Partial<Pick<UserProps, 'name' | 'email' | 'password'>>,
   ): Promise<User> {
     const updateData: Record<string, string> = {};
     if (data.name) updateData.name = data.name;

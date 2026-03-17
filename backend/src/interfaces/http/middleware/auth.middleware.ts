@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { constants as HttpStatus } from 'node:http2';
+import logger from 'src/infrastructure/logger';
 
 interface JwtPayload {
   userId: string;
@@ -9,7 +11,8 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Missing or invalid authorization header' });
+    logger.warn({ path: req.path, method: req.method }, 'Request rejected: missing or invalid authorization header');
+    res.status(HttpStatus.HTTP_STATUS_UNAUTHORIZED).json({ error: 'Missing or invalid authorization header' });
     return;
   }
 
@@ -17,15 +20,18 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const secret = process.env.JWT_SECRET;
 
   if (!secret) {
-    res.status(500).json({ error: 'JWT_SECRET not configured' });
+    logger.error('JWT_SECRET is not configured');
+    res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'JWT_SECRET not configured' });
     return;
   }
 
   try {
     const payload = jwt.verify(token, secret) as JwtPayload;
     req.userId = payload.userId;
+    logger.info({ userId: payload.userId, path: req.path, method: req.method }, 'Request authenticated');
     next();
   } catch {
-    res.status(401).json({ error: 'Invalid or expired token' });
+    logger.warn({ path: req.path, method: req.method }, 'Request rejected: invalid or expired token');
+    res.status(HttpStatus.HTTP_STATUS_UNAUTHORIZED).json({ error: 'Invalid or expired token' });
   }
 }

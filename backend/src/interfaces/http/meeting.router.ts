@@ -3,6 +3,7 @@ import { PrismaMeetingRepository } from 'src/infrastructure/repositories/PrismaM
 import { ListUserMeetingsUseCase } from 'src/use-cases/meetings/list-user-meetings';
 import { GetMeetingDetailsUseCase } from 'src/use-cases/meetings/get-meeting-details';
 import { authMiddleware } from './middleware/auth.middleware';
+import { constants as HttpStatus } from 'node:http2';
 
 const meetingRouter = Router();
 
@@ -11,7 +12,7 @@ meetingRouter.get('/user/:userId', authMiddleware, async (req, res) => {
     const { userId } = req.params;
 
     if (userId !== req.userId) {
-      return res.status(403).json({ error: 'Forbidden' });
+      return res.status(HttpStatus.HTTP_STATUS_FORBIDDEN).json({ error: 'Forbidden' });
     }
 
     const meetingRepository = new PrismaMeetingRepository();
@@ -19,11 +20,11 @@ meetingRouter.get('/user/:userId', authMiddleware, async (req, res) => {
 
     const meetings = await usecase.execute(userId);
 
-    return res.status(200).json({
+    return res.status(HttpStatus.HTTP_STATUS_OK).json({
       data: meetings,
     });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 });
 
@@ -36,14 +37,18 @@ meetingRouter.get('/:id', authMiddleware, async (req, res) => {
     const meeting = await usecase.execute(id);
 
     if (!meeting) {
-      return res.status(404).json({ error: 'Meeting not found' });
+      return res.status(HttpStatus.HTTP_STATUS_NOT_FOUND).json({ error: 'Meeting not found' });
     }
 
-    return res.status(200).json({
+    if (meeting.userId !== req.userId) {
+      return res.status(HttpStatus.HTTP_STATUS_FORBIDDEN).json({ error: 'Forbidden' });
+    }
+
+    return res.status(HttpStatus.HTTP_STATUS_OK).json({
       data: meeting,
     });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
 });
 

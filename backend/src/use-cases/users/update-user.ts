@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { User } from '../../domain/entities/User';
+import { User, UserProps } from '../../domain/entities/User';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 
 interface UpdateUserInput {
@@ -28,7 +28,7 @@ export class UpdateUserUseCase {
       }
     }
 
-    const updateData: Partial<Pick<User, 'name' | 'email' | 'password'>> = {};
+    const updateData: Partial<Pick<UserProps, 'name' | 'email' | 'password'>> = {};
     if (input.name) updateData.name = input.name;
     if (input.email) updateData.email = input.email.toLowerCase();
     if (input.password) updateData.password = await bcrypt.hash(input.password, 10);

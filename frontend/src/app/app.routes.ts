@@ -21,17 +21,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: '**',
-    redirectTo: '',
-  },
-  {
-    path: 'history',
-    loadComponent: () =>
-      import('./features/meeting/pages/meeting-history/meeting-history.component').then((m) => m.MeetingHistoryComponent),
-  },
-  {
     path: 'meeting/:id',
     loadComponent: () =>
       import('./features/meeting/pages/meeting-details/meeting-details.component').then((m) => m.MeetingDetailsComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: '**',
+    redirectTo: '',
   },
 ];

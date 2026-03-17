@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PrismaMeetingRepository } from '../../infrastructure/repositories/PrismaMeetingRepository';
 import { ListMeetingsByUserUseCase } from '../../use-cases/meetings/list-by-user';
 import { authMiddleware } from './middleware/auth.middleware';
+import { constants as HttpStatus } from 'node:http2';
 
 const meetingsRouter = Router();
 const meetingRepository = new PrismaMeetingRepository();
@@ -29,9 +30,9 @@ meetingsRouter.get('/history', authMiddleware, async (req, res) => {
       updatedAt: meeting.updatedAt,
     }));
 
-    return res.json(result);
+    return res.status(HttpStatus.HTTP_STATUS_OK).json(result);
   } catch (err: any) {
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
 });
 
