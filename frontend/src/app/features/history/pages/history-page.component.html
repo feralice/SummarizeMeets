@@ -1,21 +1,66 @@
 <div class="history-page">
-  <h2>Histórico de Reuniões</h2>
+  <header class="history-header">
+    <h2>Histórico de Reuniões</h2>
+    <a routerLink="/" class="btn-new">+ Nova análise</a>
+  </header>
 
-  <div *ngIf="loading">Carregando...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+  <!-- LOADING -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Carregando histórico...</p>
+  </div>
 
-  <ul *ngIf="!loading && meetings.length === 0">
-    Nenhuma reunião encontrada.
-  </ul>
+  <!-- ERROR -->
+  <div *ngIf="error && !loading" class="error-state">
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="loadHistory()">Tentar novamente</button>
+  </div>
 
+  <!-- EMPTY -->
+  <div *ngIf="!loading && !error && meetings.length === 0" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h3>Nenhuma reunião ainda</h3>
+    <p>Envie uma gravação para gerar seu primeiro resumo.</p>
+    <a routerLink="/" class="btn-primary">Começar agora</a>
+  </div>
+
+  <!-- LIST -->
   <div *ngIf="meetings.length > 0" class="meetings-list">
     <div *ngFor="let m of meetings" class="meeting-card">
-      <h3>{{ m.meetingTitle }}</h3>
-      <div class="meta">
-        {{ m.meetingDate | date: 'short' }} — <strong>{{ m.status }}</strong>
+
+      <div class="card-header">
+        <div class="card-title-row">
+          <h3 class="card-title">{{ m.meetingTitle }}</h3>
+          <span class="badge" [ngClass]="statusClass(m.status)">{{ statusLabel(m.status) }}</span>
+        </div>
+        <span class="card-date">{{ m.meetingDate | date: "dd/MM/yyyy 'às' HH:mm" }}</span>
       </div>
-      <p class="summary">{{ m.summary | json }}</p>
-      <p *ngIf="m.decisions?.length" class="actions"><strong>Decisions:</strong> {{ m.decisions.join(', ') }}</p>
+
+      <p *ngIf="introduction(m)" class="card-intro">{{ introduction(m) }}</p>
+
+      <div *ngIf="isCompleted(m.status)" class="card-stats">
+        <span *ngIf="m.decisions?.length" class="stat">
+          {{ m.decisions.length }} {{ m.decisions.length === 1 ? 'decisão' : 'decisões' }}
+        </span>
+        <span *ngIf="m.actionItems?.length" class="stat">
+          {{ m.actionItems.length }} {{ m.actionItems.length === 1 ? 'próximo passo' : 'próximos passos' }}
+        </span>
+        <span *ngIf="m.topics?.length" class="stat">
+          {{ m.topics.length }} {{ m.topics.length === 1 ? 'tópico' : 'tópicos' }}
+        </span>
+      </div>
+
+      <div class="card-footer">
+        <a *ngIf="isCompleted(m.status) && m.id" [routerLink]="['/meeting', m.id]" class="btn-primary">
+          Ver resumo
+        </a>
+        <span *ngIf="m.status === 'processing'" class="processing-hint">
+          <span class="spinner-sm"></span> Em processamento...
+        </span>
+        <span *ngIf="m.status === 'queued'" class="queued-hint">Na fila para processar</span>
+        <span *ngIf="m.status === 'failed'" class="failed-hint">Falhou - envie novamente</span>
+      </div>
+
     </div>
   </div>
 </div>

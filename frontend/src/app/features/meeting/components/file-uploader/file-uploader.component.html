@@ -1,26 +1,36 @@
-<div class="dropzone" *ngIf="!file">
+<div class="dropzone" [class.has-files]="files.length > 0">
   <div class="icon">🎬</div>
 
   <h3>Arraste seu vídeo ou áudio aqui</h3>
-  <p class="hint">Ou clique para selecionar um arquivo</p>
+  <p class="hint">Ou clique para selecionar arquivos</p>
 
-  <input type="file" hidden #fileInput accept="video/*,audio/*" (change)="onFileChange($event)" />
+  <input type="file" hidden #fileInput accept="video/*,audio/*" multiple (change)="onFileChange($event)" />
 
-  <button class="btn-primary" (click)="fileInput.click()">Selecionar arquivo</button>
+  <button class="btn-primary" (click)="fileInput.click()" [disabled]="files.length >= 5">
+    {{ files.length >= 5 ? 'Limite atingido' : 'Selecionar arquivo' }}
+  </button>
 
-  <small class="support-text"> Formatos suportados: MP4, MOV, AVI, MP3, WAV • Até 2GB </small>
+  <small class="support-text">
+    Formatos suportados: MP4, MOV, AVI, MP3, WAV • Até 2GB • Envie até 5 arquivos de uma vez
+  </small>
 
   <p class="error" *ngIf="error">{{ error }}</p>
-</div>
 
-<div class="file-preview" *ngIf="file">
-  <div class="file-icon">🎥</div>
+  <div class="file-list" *ngIf="files.length > 0">
+    <div class="file-row" *ngFor="let f of files; let i = index">
+      <span class="file-row-icon">🎥</span>
+      <div class="file-row-info">
+        <span class="file-row-name">{{ f.name }}</span>
+        <span class="file-row-size">{{ f.size / 1024 / 1024 | number: '1.1-1' }} MB</span>
+      </div>
+      <button class="btn-remove" (click)="removeFileAt(i)" [disabled]="isProcessing">×</button>
+    </div>
 
-  <strong>{{ file.name }}</strong>
-  <span> {{ (file.size || 0) / 1024 / 1024 | number: '1.1-1' }} MB </span>
-
-  <div class="actions">
-    <button class="btn-text" (click)="removeFile()">Remover</button>
-    <button class="btn-primary" (click)="generateSummary.emit()">Gerar resumo</button>
+    <div class="actions">
+      <button class="btn-text" (click)="removeFile()" [disabled]="isProcessing">Remover todos</button>
+      <button class="btn-primary" (click)="generateSummary.emit()" [disabled]="isProcessing">
+        {{ isProcessing ? 'Enviando...' : 'Gerar resumo (' + files.length + ')' }}
+      </button>
+    </div>
   </div>
 </div>

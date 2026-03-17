@@ -1,0 +1,30 @@
+<div class="queue-list" *ngIf="items.length > 0">
+  <h3>Resumos em processamento <span class="queue-counter">{{ items.length }}/5</span></h3>
+
+  <div class="queue-item" *ngFor="let item of items">
+    <div class="item-info">
+      <div class="item-main">
+        <span class="file-name">{{ item.fileName }}</span>
+        <span class="badge" [ngClass]="statusClass(item.status)">
+          <span *ngIf="item.status === 'processing'" class="spinner"></span>
+          {{ statusLabel(item.status) }}
+        </span>
+      </div>
+      <span class="error-detail" *ngIf="item.status === 'failed' && item.errorMessage">
+        {{ item.errorMessage }}
+      </span>
+    </div>
+
+    <button
+      *ngIf="item.status === 'completed'"
+      class="btn-secondary"
+      (click)="viewResult.emit(item.meetingId)"
+    >
+      Ver resultado
+    </button>
+  </div>
+
+  <div class="queue-footer" *ngIf="allDone">
+    <a routerLink="/history" class="btn-primary">Ir para histórico</a>
+  </div>
+</div>

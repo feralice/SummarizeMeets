@@ -1,62 +1,74 @@
-import { Component } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { VideoService } from '../../../core/services/media-analysis.service';
+import { QueueStateService } from '../../../core/services/queue-state.service';
 import { FileUploaderComponent } from '../components/file-uploader/file-uploader.component';
-import { ProcessingIndicatorComponent } from '../components/processing-indicator/processing-indicator.component';
-import { MeetingResultComponent } from '../components/meeting-result/meeting-result.component';
-import { MeetingAnalysis } from '../../../core/models/meeting-analysis.model';
+import { QueueListComponent } from '../components/queue-list/queue-list.component';
 
 @Component({
   selector: 'app-meeting-page',
   standalone: true,
-  imports: [
-    CommonModule,
-    FileUploaderComponent,
-    ProcessingIndicatorComponent,
-    MeetingResultComponent,
-  ],
+  imports: [CommonModule, FileUploaderComponent, QueueListComponent],
   templateUrl: './meeting-page.component.html',
   styleUrls: ['./meeting-page.component.css'],
 })
 export class MeetingPageComponent {
-  selectedFile: File | null = null;
+  @ViewChild(FileUploaderComponent) uploaderRef!: FileUploaderComponent;
 
-  showProcessing = false;
-  progress = 0;
-  currentStage = '';
-  analysisResult: MeetingAnalysis | null = null;
+  selectedFiles: File[] = [];
   error: string | null = null;
-  showResultModal = false;
+  isSubmitting = false;
 
-  constructor(private mediaService: VideoService) {}
+  private mediaService = inject(VideoService);
+  private queueState = inject(QueueStateService);
+  private router = inject(Router);
 
-  onFileSelected(file: File) {
-    this.selectedFile = file;
+  get queue() {
+    return this.queueState.queue();
   }
 
-  closeModal(): void {
-    this.showResultModal = false;
+  onFileSelected(files: File[]) {
+    this.selectedFiles = files;
   }
 
   onGenerateSummary() {
-    if (!this.selectedFile) return;
+    if (!this.selectedFiles.length || this.isSubmitting) return;
 
+    const files = [...this.selectedFiles];
     this.error = null;
-    this.analysisResult = null;
+    this.isSubmitting = true;
 
-    this.showProcessing = true;
-    this.currentStage = 'Enviando arquivo...';
+    let remaining = files.length;
+    const errors: string[] = [];
 
-    this.mediaService.analyzeVideo(this.selectedFile).subscribe({
-      next: (res) => {
-        this.analysisResult = res;
-        this.showProcessing = false;
-        this.showResultModal = true;
-      },
-      error: (err) => {
-        this.error = err.message;
-        this.showProcessing = false;
-      },
-    });
+    const onDone = () => {
+      if (--remaining > 0) return;
+      this.isSubmitting = false;
+      this.uploaderRef.removeFile();
+      this.selectedFiles = [];
+      if (errors.length) this.error = errors.join('\n');
+    };
+
+    for (const file of files) {
+      this.mediaService.analyzeVideo(file).subscribe({
+        next: (res) => {
+          this.queueState.addItem({
+            meetingId: res.meetingId,
+            fileName: file.name,
+            status: 'queued',
+          });
+          onDone();
+        },
+        error: (err) => {
+          errors.push(`${file.name}: ${err.message}`);
+          onDone();
+        },
+      });
+    }
+  }
+
+  onViewResult(meetingId: string) {
+    this.router.navigate(['/meeting', meetingId]);
   }
 }

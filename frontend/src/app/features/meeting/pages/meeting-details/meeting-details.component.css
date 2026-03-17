@@ -9,6 +9,10 @@
 }
 
 .btn-back {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   text-decoration: none;
   color: #64748b;
   font-size: 0.875rem;

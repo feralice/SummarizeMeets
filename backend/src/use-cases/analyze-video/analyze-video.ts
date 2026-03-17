@@ -1,43 +1,31 @@
 import { GeminiProvider } from 'src/infrastructure/providers/gemini/gemini-provider';
-import { IMeetingRepository } from 'src/domain/repositories/IMeetingRepository';
-import { Meeting } from 'src/domain/entities/Meeting';
+import { AnalysisResults } from 'src/domain/repositories/IMeetingRepository';
+import { MEETING_ANALYSIS_PROMPT } from 'src/core/constants/meeting-analysis.prompt';
 import logger from 'src/infrastructure/logger';
 
 export class AnalyzeVideoUseCase {
-  constructor(
-    private provider: GeminiProvider,
-    private meetingRepository: IMeetingRepository
-  ) {}
+  constructor(private provider: GeminiProvider) {}
 
-  async execute(video: Buffer, mime: string, prompt: string, userId: string, title?: string) {
+  async execute(meetingId: string, video: Buffer, mime: string): Promise<AnalysisResults> {
     if (!video) throw new Error('Video is required');
-    if (!prompt) throw new Error('Prompt is required');
-    if (!userId) throw new Error('UserId is required');
+    if (!meetingId) throw new Error('Meeting ID is required');
 
-    logger.info({ userId, mimeType: mime, fileSizeBytes: video.byteLength, title }, 'Starting media analysis');
+    logger.info({ meetingId, mimeType: mime, fileSizeBytes: video.byteLength }, 'Starting media analysis');
 
-    logger.info({ userId }, 'Sending media to Gemini');
-    const result = await this.provider.analyzeMedia(video, mime, prompt);
-    logger.info({ userId, topicsCount: result.topics.length, actionItemsCount: result.action_items.length }, 'Gemini analysis completed');
+    logger.info({ meetingId }, 'Sending media to Gemini');
+    const result = await this.provider.analyzeMedia(video, mime, MEETING_ANALYSIS_PROMPT);
+    logger.info(
+      { meetingId, topicsCount: result.topics.length, actionItemsCount: result.action_items.length },
+      'Gemini analysis completed'
+    );
 
-    const meeting = new Meeting({
-      meetingTitle: title || 'Nova Reunião',
-      meetingDate: new Date(),
+    // Map Gemini's snake_case action_items → camelCase actionItems
+    return {
       summary: result.summary,
       topics: result.topics,
       decisions: result.decisions,
       actionItems: result.action_items,
       speakers: result.speakers,
-      status: 'completed',
-      userId,
-    });
-
-    const savedMeeting = await this.meetingRepository.create(meeting);
-    logger.info({ userId, meetingId: savedMeeting.id }, 'Meeting saved successfully');
-
-    return {
-      ...result,
-      id: savedMeeting.id,
     };
   }
 }

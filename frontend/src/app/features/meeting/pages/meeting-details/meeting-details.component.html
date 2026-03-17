@@ -1,6 +1,6 @@
 <div class="details-container">
   <header class="details-header no-print">
-    <a routerLink="/history" class="btn-back">← Voltar para o Histórico</a>
+    <button class="btn-back" (click)="goBack()">← Voltar</button>
     <div class="header-main">
       <h1>{{ meeting?.meetingTitle }}</h1>
       <p class="date">{{ meeting?.meetingDate | date: 'dd/MM/yyyy HH:mm' }}</p>
@@ -17,7 +17,7 @@
   @if (error) {
   <div class="error-state">
     <p>{{ error }}</p>
-    <a routerLink="/history" class="btn-primary">Voltar ao Histórico</a>
+    <button class="btn-primary" (click)="goBack()">Voltar</button>
   </div>
   }
 

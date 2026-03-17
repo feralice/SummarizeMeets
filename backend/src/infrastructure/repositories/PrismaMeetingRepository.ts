@@ -1,5 +1,5 @@
 import { Meeting } from '../../domain/entities/Meeting';
-import { IMeetingRepository } from '../../domain/repositories/IMeetingRepository';
+import { AnalysisResults, IMeetingRepository } from '../../domain/repositories/IMeetingRepository';
 import { prisma } from '../database/prisma';
 
 export class PrismaMeetingRepository implements IMeetingRepository {
@@ -54,6 +54,27 @@ export class PrismaMeetingRepository implements IMeetingRepository {
       userId: meeting.userId,
       createdAt: meeting.createdAt,
       updatedAt: meeting.updatedAt,
+    });
+  }
+
+  async updateStatus(id: string, status: string): Promise<void> {
+    await prisma.meeting.update({
+      where: { id },
+      data: { status },
+    });
+  }
+
+  async updateWithResults(id: string, results: AnalysisResults): Promise<void> {
+    await prisma.meeting.update({
+      where: { id },
+      data: {
+        summary: results.summary,
+        topics: results.topics,
+        decisions: results.decisions,
+        actionItems: results.actionItems,
+        speakers: results.speakers,
+        status: 'completed',
+      },
     });
   }
 

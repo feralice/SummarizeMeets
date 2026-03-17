@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, map } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { MEETING_ANALYSIS_PROMPT } from '../constants/meeting-analysis.prompt';
-import { MeetingAnalysis } from '../models/meeting-analysis.model';
 import { Meeting } from '../models/meeting.model';
 
 @Injectable({ providedIn: 'root' })
@@ -12,16 +10,21 @@ export class VideoService {
 
   constructor(private http: HttpClient) {}
 
-  analyzeVideo(file: File): Observable<MeetingAnalysis & { id: string }> {
+  analyzeVideo(file: File): Observable<{ meetingId: string; status: string }> {
     const formData = new FormData();
     formData.append('media', file);
-    formData.append('prompt', MEETING_ANALYSIS_PROMPT);
     formData.append('title', file.name.split('.')[0]);
+    // NOTE: prompt is no longer sent — it is a server-side constant
 
-    return this.http.post<{ data: MeetingAnalysis & { id: string } }>(`${this.apiUrl}/analyze-media`, formData).pipe(
-      map((res) => res.data),
-      catchError(this.handleError),
-    );
+    return this.http
+      .post<{ data: { meetingId: string; status: string } }>(
+        `${this.apiUrl}/analyze-media`,
+        formData
+      )
+      .pipe(
+        map((res) => res.data),
+        catchError(this.handleError),
+      );
   }
 
   getUserMeetings(userId: string): Observable<Meeting[]> {
