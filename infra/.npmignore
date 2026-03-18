@@ -1,0 +1,5 @@
+test/
+cdk.out/
+dist/
+*.test.ts
+jest.config.js
