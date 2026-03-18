@@ -83,15 +83,13 @@ describe('SumMeetStack', () => {
 
   describe('RDS Security Group', () => {
     test('allows PostgreSQL 5432 only from EC2 Security Group (not a CIDR)', () => {
-      template.hasResourceProperties('AWS::EC2::SecurityGroup', {
-        SecurityGroupIngress: Match.arrayWith([
-          Match.objectLike({
-            IpProtocol: 'tcp',
-            FromPort: 5432,
-            ToPort: 5432,
-            SourceSecurityGroupId: Match.anyValue(),
-          }),
-        ]),
+      // CDK creates a separate AWS::EC2::SecurityGroupIngress resource
+      // when both SGs are in the same stack (to avoid circular dependencies)
+      template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
+        IpProtocol: 'tcp',
+        FromPort: 5432,
+        ToPort: 5432,
+        SourceSecurityGroupId: Match.anyValue(),
       });
     });
   });
@@ -100,8 +98,8 @@ describe('SumMeetStack', () => {
     test('VPC has Project and Environment tags', () => {
       template.hasResourceProperties('AWS::EC2::VPC', {
         Tags: Match.arrayWith([
-          Match.objectLike({ Key: 'Project', Value: 'summeet' }),
           Match.objectLike({ Key: 'Environment', Value: 'production' }),
+          Match.objectLike({ Key: 'Project', Value: 'summeet' }),
         ]),
       });
     });
