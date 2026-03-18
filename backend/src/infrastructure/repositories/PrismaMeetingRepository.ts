@@ -28,6 +28,7 @@ export class PrismaMeetingRepository implements IMeetingRepository {
       actionItems: createdMeeting.actionItems as any[],
       speakers: createdMeeting.speakers as any[],
       status: createdMeeting.status,
+      errorMessage: createdMeeting.errorMessage,
       userId: createdMeeting.userId,
       createdAt: createdMeeting.createdAt,
       updatedAt: createdMeeting.updatedAt,
@@ -51,16 +52,17 @@ export class PrismaMeetingRepository implements IMeetingRepository {
       actionItems: meeting.actionItems as any[],
       speakers: meeting.speakers as any[],
       status: meeting.status,
+      errorMessage: meeting.errorMessage,
       userId: meeting.userId,
       createdAt: meeting.createdAt,
       updatedAt: meeting.updatedAt,
     });
   }
 
-  async updateStatus(id: string, status: string): Promise<void> {
+  async updateStatus(id: string, status: string, errorMessage?: string): Promise<void> {
     await prisma.meeting.update({
       where: { id },
-      data: { status },
+      data: { status, ...(errorMessage !== undefined && { errorMessage }) },
     });
   }
 
@@ -96,6 +98,7 @@ export class PrismaMeetingRepository implements IMeetingRepository {
           actionItems: meeting.actionItems as any[],
           speakers: meeting.speakers as any[],
           status: meeting.status,
+          errorMessage: meeting.errorMessage,
           userId: meeting.userId,
           createdAt: meeting.createdAt,
           updatedAt: meeting.updatedAt,

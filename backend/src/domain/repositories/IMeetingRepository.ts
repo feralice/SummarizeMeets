@@ -12,6 +12,6 @@ export interface IMeetingRepository {
   create(meeting: Meeting): Promise<Meeting>;
   findById(id: string): Promise<Meeting | null>;
   findByUserId(userId: string): Promise<Meeting[]>;
-  updateStatus(id: string, status: string): Promise<void>;
+  updateStatus(id: string, status: string, errorMessage?: string): Promise<void>;
   updateWithResults(id: string, results: AnalysisResults): Promise<void>;
 }

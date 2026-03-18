@@ -35,7 +35,8 @@ const queueService = new QueueService(async (job: QueueJob) => {
     const results = await useCase.execute(job.meetingId, job.fileBuffer, job.mimeType);
     await meetingRepository.updateWithResults(job.meetingId, results);
   } catch (err) {
-    await meetingRepository.updateStatus(job.meetingId, 'failed');
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    await meetingRepository.updateStatus(job.meetingId, 'failed', errorMessage);
     throw err; // re-throw so QueueService logs it
   }
 });

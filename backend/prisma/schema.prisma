@@ -29,8 +29,9 @@ model Meeting {
   decisions    Json
   actionItems  Json
   speakers     Json
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
+  status        String   @default("pending")
+  errorMessage  String?
+  createdAt     DateTime @default(now())
   updatedAt    DateTime @updatedAt
   userId       String
 

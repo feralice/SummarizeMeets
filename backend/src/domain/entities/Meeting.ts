@@ -8,6 +8,7 @@ export interface MeetingProps {
   actionItems: any[];
   speakers: any[];
   status: string;
+  errorMessage?: string | null;
   userId: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -34,6 +35,7 @@ export class Meeting {
       actionItems: this.props.actionItems,
       speakers: this.props.speakers,
       status: this.props.status,
+      errorMessage: this.props.errorMessage,
       userId: this.props.userId,
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
@@ -74,6 +76,10 @@ export class Meeting {
 
   get status(): string {
     return this.props.status;
+  }
+
+  get errorMessage(): string | null | undefined {
+    return this.props.errorMessage;
   }
 
   get userId(): string {

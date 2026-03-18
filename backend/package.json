@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch ./src --ext ts --exec ts-node ./src/server.ts",
+    "dev": "nodemon --watch ./src --ext ts --exec 'ts-node -r dotenv/config ./src/server.ts'",
     "compile": "npx tsc",
-    "start": "node ./dist/server.js",
-    "test:db": "ts-node tests/test-prisma.ts",
+    "start": "node -r dotenv/config ./dist/server.js",
+    "test:db": "ts-node -r dotenv/config tests/test-prisma.ts",
     "format": "prettier --write \"{src,prisma,tests,docs}/**/*.{ts,tsx,js,json,md}\" \"*.md\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

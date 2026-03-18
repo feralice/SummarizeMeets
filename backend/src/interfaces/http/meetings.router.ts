@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaMeetingRepository } from '../../infrastructure/repositories/PrismaMeetingRepository';
-import { ListMeetingsByUserUseCase } from '../../use-cases/meetings/list-by-user';
+import { ListUserMeetingsUseCase } from '../../use-cases/meetings/list-user-meetings';
 import { authMiddleware } from './middleware/auth.middleware';
 import { constants as HttpStatus } from 'node:http2';
 
@@ -12,7 +12,7 @@ meetingsRouter.get('/history', authMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
 
-    const useCase = new ListMeetingsByUserUseCase(meetingRepository);
+    const useCase = new ListUserMeetingsUseCase(meetingRepository);
     const meetings = await useCase.execute(userId!);
 
     const result = meetings.map((meeting) => ({
