@@ -1,131 +1,125 @@
-SummarizeMeets - Backend
+SumMeet AI — Backend
 
-Backend da aplicação SummarizeMeets - Sistema de resumo inteligente de reuniões usando IA.
+API Node.js + Express responsável por autenticação, upload para S3, análise com Google Gemini e armazenamento no PostgreSQL.
 
 ---
 
 ## Arquitetura
 
-O projeto segue **Clean Architecture** com separação clara de responsabilidades:
+Clean Architecture com separação clara de responsabilidades:
 
-### **Domain Layer (Domínio)**
-- Entidades de negócio (`User`, `Meeting`)
-- Interfaces de repositórios (contratos)
-- **Zero dependências** de frameworks externos
-
-### **Infrastructure Layer (Infraestrutura)**
-- Implementações de repositórios (Prisma)
-- Configuração de banco de dados
-- Providers externos (Gemini AI)
-
-### **Interface Layer (Interface)**
-- Controllers e Routes HTTP
-- Middlewares de validação
-- Entrada/saída de dados
-
-### **Use Cases (Casos de Uso)**
-- Lógica de aplicação
-- Orquestração de entidades e repositories
-- Validações de negócio
+- **`domain/`** — Entidades e interfaces de repositório. Zero dependências externas.
+- **`infrastructure/`** — Prisma, S3Provider, GeminiProvider, app-config (carrega vars do AWS)
+- **`use-cases/`** — Lógica de negócio (analyze-video, list-meetings, etc.)
+- **`interfaces/http/`** — Routers e middlewares Express
 
 ---
 
-## Quick Start
+## Quick Start (Local)
 
-### **1. Pré-requisitos**
-- Node.js 22+
+### Pré-requisitos
+
+- Node.js 24+
 - Docker e Docker Compose
-- npm
 
-### **2. Instalação**
+### Instalação
 
 ```bash
-# Instalar dependências
 npm install
 
-# Criar arquivo .env
 cp .env.example .env
+# Edite .env com: GEMINI_API_KEY, JWT_SECRET, DATABASE_URL
 ```
 
-### **3. Configurar Banco de Dados**
+### Banco de Dados
 
 ```bash
-# Iniciar PostgreSQL no Docker
+# Subir PostgreSQL local
 docker-compose up -d
 
-# Aplicar migrações
+# Gerar Prisma Client e aplicar migrations
+npx prisma generate
 npx prisma migrate dev
-
-# Testar conexão
-npm run test:db
 ```
 
-**Sucesso:** Deve mostrar "Todos os testes passaram!"
-
-### **4. Executar Aplicação**
+### Executar
 
 ```bash
-# Modo desenvolvimento
+# Desenvolvimento (watch mode)
 npm run dev
 
 # Compilar TypeScript
 npm run compile
 
-# Modo produção
+# Produção (requer dist/ compilado)
 npm start
 ```
 
+Backend disponível em `http://localhost:3000`.
+
+> Em produção na AWS, as variáveis de ambiente são carregadas automaticamente do SSM + Secrets Manager pelo `src/infrastructure/config/app-config.ts`. O `.env` só é usado localmente.
+
 ---
 
-## Scripts Disponíveis
+## Scripts
 
 | Script | Descrição |
 |--------|-----------|
-| `npm run dev` | Inicia servidor em modo desenvolvimento (watch) |
-| `npm run compile` | Compila TypeScript para JavaScript |
-| `npm start` | Executa versão compilada (produção) |
-| `npm run test:db` | Testa conexão e operações do banco |
+| `npm run dev` | Desenvolvimento com auto-reload (ts-node + nodemon) |
+| `npm run compile` | Compila TypeScript → `dist/` |
+| `npm start` | Executa `dist/server.js` (produção) |
 | `npm run format` | Formata código com Prettier |
 
 ---
 
-## Banco de Dados
+## Variáveis de Ambiente
 
-### **Tecnologias**
-- **PostgreSQL 15**
-- **Prisma ORM 7**
-- **Porta:** 5433
+O arquivo `.env.example` documenta todas as variáveis necessárias para rodar localmente.
 
-### Documentação Completa
+| Variável | Descrição | Origem em produção |
+|----------|-----------|-------------------|
+| `DATABASE_URL` | Connection string PostgreSQL | Secrets Manager |
+| `GEMINI_API_KEY` | Chave Google Gemini | Secrets Manager |
+| `JWT_SECRET` | Secret para assinar tokens | Secrets Manager |
+| `S3_RECORDINGS_BUCKET` | Nome do bucket de gravações | SSM Parameter Store |
+| `AWS_REGION` | Região AWS | `us-east-1` (default) |
 
-- **[DATABASE.md](docs/DATABASE.md)** - Documentação completa do banco de dados
-- **[DATABASE_SETUP.md](docs/DATABASE_SETUP.md)** - Guia passo a passo de configuração
+---
+
+## Rotas
+
+| Método | Rota | Descrição | Auth |
+|--------|------|-----------|------|
+| `POST` | `/api/auth/register` | Cadastro | Pública |
+| `POST` | `/api/auth/login` | Login | Pública |
+| `POST` | `/api/upload-url` | Gera pre-signed PUT URL para S3 | JWT |
+| `POST` | `/api/analyze-media` | Inicia análise do arquivo no S3 | JWT |
+| `GET` | `/api/meetings/:id` | Detalhes de uma reunião | JWT |
+| `GET` | `/api/meetings/:id/download-url` | Pre-signed GET URL do arquivo | JWT |
+| `GET` | `/api/meetings/user/:userId` | Lista reuniões do usuário | JWT |
+| `GET` | `/api/history` | Histórico do usuário autenticado | JWT |
 
 ---
 
 ## Tecnologias
 
-### **Core**
-- **TypeScript 5.9**
-- **Node.js 22**
-- **Express 5**
+- **Node.js 24** + **TypeScript 5** + **Express 5**
+- **Prisma ORM 7** — PostgreSQL 17
+- **Google Gemini** (`@google/genai`)
+- **AWS SDK v3** — S3, SSM, Secrets Manager
+- **JWT** + **bcrypt** — Autenticação
+- **Zod** — Validação da resposta do Gemini
+- **pino** — Logging estruturado
+- **pm2** — Process manager em produção
 
-### **Database**
-- **PostgreSQL 15**
-- **Prisma ORM 7**
-- **@prisma/adapter-pg**
+---
 
-### **AI/ML**
-- **Google Generative AI (Gemini)**
+## Deploy em Produção
 
-### **Utilities**
-- **Multer** - Upload de arquivos
-- **Helmet** - Segurança HTTP
-- **CORS** - Cross-Origin Resource Sharing
-- **Morgan** - Logger HTTP
-- **Dotenv** - Variáveis de ambiente
+```bash
+# Na raiz do projeto
+bash scripts/deploy-backend.sh
+```
 
-### **Dev Tools**
-- **ts-node** - Execução TypeScript
-- **Nodemon** - Auto-reload
-- **Prettier** - Code formatter
+O script faz rsync do código, instala dependências, compila e reinicia o pm2 na EC2.
+Requer `summeet-key.pem` na raiz e perfil AWS `summeet` configurado.

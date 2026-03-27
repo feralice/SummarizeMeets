@@ -1,59 +1,99 @@
-# Frontend
+# SumMeet AI — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.10.
+Aplicação Angular que permite upload de gravações de reuniões, exibe resumos gerados por IA e exporta resultados em PDF.
 
-## Development server
+---
 
-To start a local development server, run:
+## URLs
 
-```bash
-ng serve
-```
+| Ambiente | URL |
+|----------|-----|
+| Produção | `https://d1lk17oezuw2r3.cloudfront.net` |
+| Local | `http://localhost:4200` |
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## Quick Start (Local)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Pré-requisitos
 
-```bash
-ng generate component component-name
-```
+- Node.js 24+
+- Backend rodando em `http://localhost:3000`
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+### Instalação e execução
 
 ```bash
-ng build
+npm install
+
+# Servidor de desenvolvimento (aponta para localhost:3000)
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+O app estará disponível em `http://localhost:4200` com hot-reload automático.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Environments
+
+O projeto usa Angular environment files para separar URLs por ambiente:
+
+| Arquivo | Usado em | API URL |
+|---------|----------|---------|
+| `src/environments/environment.ts` | `npm start` / `ng serve` | `http://localhost:3000/api` |
+| `src/environments/environment.prod.ts` | Build de produção | `https://d1lk17oezuw2r3.cloudfront.net/api` |
+
+O `angular.json` já está configurado com `fileReplacements` para trocar automaticamente os arquivos na build de produção.
+
+---
+
+## Build de Produção
 
 ```bash
-ng test
+# Gera os arquivos em dist/frontend/browser/
+npm run build -- --configuration production
 ```
 
-## Running end-to-end tests
+> Usa `environment.prod.ts` automaticamente — aponta para CloudFront.
 
-For end-to-end (e2e) testing, run:
+---
+
+## Deploy em Produção
 
 ```bash
-ng e2e
+# Na raiz do projeto
+bash scripts/deploy-frontend.sh
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+O script faz o build, sincroniza com o S3 e invalida o cache do CloudFront.
+Requer perfil AWS `summeet` configurado.
 
-## Additional Resources
+---
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Rotas
+
+| Rota | Descrição | Guard |
+|------|-----------|-------|
+| `/login` | Login e cadastro | `noAuthGuard` |
+| `/` | Upload + análise | `authGuard` |
+| `/history` | Histórico de reuniões | `authGuard` |
+| `/meeting/:id` | Detalhes da reunião | — |
+
+---
+
+## Fluxo de Upload
+
+1. Usuário seleciona arquivo de vídeo/áudio
+2. Frontend solicita `POST /api/upload-url` → recebe `{ uploadUrl, s3Key }`
+3. Frontend faz `PUT <uploadUrl>` **direto no S3** (sem passar pelo backend)
+4. Frontend notifica `POST /api/analyze-media` com `{ s3Key, meetingTitle }`
+5. Backend processa em background e retorna `{ meetingId, status: "queued" }`
+6. Frontend exibe progresso e resultado quando disponível
+
+---
+
+## Tecnologias
+
+- **Angular 20+** — Standalone components
+- **RxJS** — Gerenciamento de estado e chamadas HTTP
+- **jsPDF + html2canvas** — Exportação em PDF
+- **TypeScript 5**

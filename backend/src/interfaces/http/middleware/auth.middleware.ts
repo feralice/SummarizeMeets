@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { constants as HttpStatus } from 'node:http2';
-import logger from 'src/infrastructure/logger';
+import logger from '../../../infrastructure/logger';
 
 interface JwtPayload {
   userId: string;

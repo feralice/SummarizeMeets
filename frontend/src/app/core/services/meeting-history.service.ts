@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface MeetingDto {
   id?: string;
@@ -20,7 +21,7 @@ export interface MeetingDto {
 
 @Injectable({ providedIn: 'root' })
 export class MeetingHistoryService {
-  private apiUrl = 'http://localhost:3000/api/history';
+  private apiUrl = `${environment.apiUrl}/history`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,0 +1,24 @@
+# SSH keys
+*.pem
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+frontend/dist/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+
+# Local tool configs
+.gemini/

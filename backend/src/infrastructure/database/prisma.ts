@@ -1,18 +1,29 @@
-import 'dotenv/config';
-import { PrismaClient } from '../../generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+// Pool and client are created on first use — not at import time.
+// This allows app-config.ts to populate DATABASE_URL before prisma initializes.
+let _client: PrismaClient | undefined;
 
-const adapter = new PrismaPg(pool);
-export const prisma = new PrismaClient({ adapter });
+function getClient(): PrismaClient {
+  if (!_client) {
+    const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+    const adapter = new PrismaPg(pool);
+    _client = new PrismaClient({ adapter });
+  }
+  return _client;
+}
+
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    return (getClient() as any)[prop];
+  },
+});
 
 export const connectDatabase = async (): Promise<void> => {
   try {
-    await prisma.$connect();
+    await getClient().$connect();
     console.log('Database connected successfully');
   } catch (error) {
     console.error('Database connection failed:', error);
@@ -21,6 +32,6 @@ export const connectDatabase = async (): Promise<void> => {
 };
 
 export const disconnectDatabase = async (): Promise<void> => {
-  await prisma.$disconnect();
+  await getClient().$disconnect();
   console.log('Database disconnected');
 };

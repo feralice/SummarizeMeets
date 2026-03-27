@@ -6,11 +6,6 @@
     "rootDir": "./src/",
     "outDir": "./dist/",
 
-    "baseUrl": ".",
-    "paths": {
-      "src/*": ["src/*"]
-    },
-
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

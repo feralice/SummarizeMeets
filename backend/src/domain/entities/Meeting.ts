@@ -9,6 +9,7 @@ export interface MeetingProps {
   speakers: any[];
   status: string;
   errorMessage?: string | null;
+  s3Key?: string | null;
   userId: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -36,6 +37,7 @@ export class Meeting {
       speakers: this.props.speakers,
       status: this.props.status,
       errorMessage: this.props.errorMessage,
+      s3Key: this.props.s3Key,
       userId: this.props.userId,
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
@@ -80,6 +82,10 @@ export class Meeting {
 
   get errorMessage(): string | null | undefined {
     return this.props.errorMessage;
+  }
+
+  get s3Key(): string | null | undefined {
+    return this.props.s3Key;
   }
 
   get userId(): string {

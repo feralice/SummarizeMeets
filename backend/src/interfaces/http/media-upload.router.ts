@@ -1,71 +1,102 @@
 import { Router } from 'express';
-import { upload } from 'src/config/multer';
-import { withFilters } from './filters/with-filters';
-import { PrismaMeetingRepository } from 'src/infrastructure/repositories/PrismaMeetingRepository';
-import { validateMediaMimeType } from './filters/validate-media-type';
 import { authMiddleware } from './middleware/auth.middleware';
-import { QueueService } from 'src/infrastructure/queue/queue.service';
-import { Meeting } from 'src/domain/entities/Meeting';
+import { PrismaMeetingRepository } from '../../infrastructure/repositories/PrismaMeetingRepository';
+import { S3Provider } from '../../infrastructure/providers/s3/s3-provider';
+import { QueueService } from '../../infrastructure/queue/queue.service';
+import { Meeting } from '../../domain/entities/Meeting';
 import { constants as HttpStatus } from 'node:http2';
-import logger from 'src/infrastructure/logger';
+import logger from '../../infrastructure/logger';
 
-export function createMediaRouter(queueService: QueueService): Router {
+const ALLOWED_MIME_TYPES = [
+  'video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo',
+  'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm', 'audio/mp4',
+];
+
+export function createMediaRouter(queueService: QueueService, s3Provider: S3Provider): Router {
   const router = Router();
 
-  router.post(
-    '/analyze-media',
-    authMiddleware,
-    upload.single('media'),
-    withFilters([validateMediaMimeType], async (req, res) => {
-      try {
-        const file = req.file;
-        const { title } = req.body;
-        const userId = req.userId!;
+  /**
+   * POST /api/upload-url
+   * Generates a pre-signed PUT URL for the browser to upload directly to S3.
+   * Body: { mimeType: string }
+   * Returns: { uploadUrl: string, s3Key: string }
+   */
+  router.post('/upload-url', authMiddleware, async (req, res) => {
+    try {
+      const { mimeType } = req.body as { mimeType?: string };
+      const userId = req.userId!;
 
-        if (!file) {
-          return res.status(HttpStatus.HTTP_STATUS_BAD_REQUEST).json({ error: 'Video file is required' });
-        }
-
-        // Create meeting immediately so polling can start right away
-        const meetingRepository = new PrismaMeetingRepository();
-        const meeting = await meetingRepository.create(new Meeting({
-          meetingTitle: title || 'Nova Reunião',
-          meetingDate: new Date(),
-          summary: {},
-          topics: [],
-          decisions: [],
-          actionItems: [],
-          speakers: [],
-          status: 'queued',
-          userId,
-        }));
-
-        const enqueued = queueService.enqueue({
-          meetingId: meeting.id!,
-          fileBuffer: file.buffer,
-          mimeType: file.mimetype,
-          userId,
-          title: title || 'Nova Reunião',
-        });
-
-        if (!enqueued) {
-          // Mark as failed since we can't process it
-          await meetingRepository.updateStatus(meeting.id!, 'failed');
-          logger.warn({ userId }, 'Queue full — request rejected');
-          return res.status(HttpStatus.HTTP_STATUS_SERVICE_UNAVAILABLE).json({
-            error: 'Servidor ocupado, tente em alguns instantes',
-          });
-        }
-
-        return res.status(HttpStatus.HTTP_STATUS_OK).json({
-          data: { meetingId: meeting.id, status: 'queued' },
-        });
-      } catch (err: any) {
-        logger.error({ err, userId: req.userId }, 'Media upload failed');
-        return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: err.message });
+      if (!mimeType) {
+        return res.status(HttpStatus.HTTP_STATUS_BAD_REQUEST).json({ error: 'mimeType is required' });
       }
-    })
-  );
+
+      if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+        return res.status(HttpStatus.HTTP_STATUS_UNPROCESSABLE_ENTITY).json({
+          error: `Unsupported media type. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`,
+        });
+      }
+
+      const { uploadUrl, s3Key } = await s3Provider.getUploadUrl(mimeType, userId);
+
+      return res.status(HttpStatus.HTTP_STATUS_OK).json({ uploadUrl, s3Key });
+    } catch (err: any) {
+      logger.error({ err, userId: req.userId }, 'Failed to generate upload URL');
+      return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: err.message });
+    }
+  });
+
+  /**
+   * POST /api/analyze-media
+   * Notifies the backend that the file is already in S3 and ready to be analysed.
+   * Body: { s3Key: string, meetingTitle?: string }
+   * Returns: { meetingId: string, status: 'queued' }
+   */
+  router.post('/analyze-media', authMiddleware, async (req, res) => {
+    try {
+      const { s3Key, meetingTitle } = req.body as { s3Key?: string; meetingTitle?: string };
+      const userId = req.userId!;
+
+      if (!s3Key) {
+        return res.status(HttpStatus.HTTP_STATUS_BAD_REQUEST).json({ error: 's3Key is required' });
+      }
+
+      const meetingRepository = new PrismaMeetingRepository();
+      const meeting = await meetingRepository.create(new Meeting({
+        meetingTitle: meetingTitle || 'Nova Reunião',
+        meetingDate: new Date(),
+        summary: {},
+        topics: [],
+        decisions: [],
+        actionItems: [],
+        speakers: [],
+        status: 'queued',
+        s3Key,
+        userId,
+      }));
+
+      const enqueued = queueService.enqueue({
+        meetingId: meeting.id!,
+        s3Key,
+        userId,
+        title: meetingTitle || 'Nova Reunião',
+      });
+
+      if (!enqueued) {
+        await meetingRepository.updateStatus(meeting.id!, 'failed');
+        logger.warn({ userId }, 'Queue full — request rejected');
+        return res.status(HttpStatus.HTTP_STATUS_SERVICE_UNAVAILABLE).json({
+          error: 'Servidor ocupado, tente em alguns instantes',
+        });
+      }
+
+      return res.status(HttpStatus.HTTP_STATUS_OK).json({
+        data: { meetingId: meeting.id, status: 'queued' },
+      });
+    } catch (err: any) {
+      logger.error({ err, userId: req.userId }, 'analyze-media failed');
+      return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: err.message });
+    }
+  });
 
   return router;
 }

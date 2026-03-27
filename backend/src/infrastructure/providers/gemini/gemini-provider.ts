@@ -1,7 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
-import { extractJson } from 'src/infrastructure/utils/extract-json';
-import { MeetingAnalysisSchema } from 'src/interfaces/schemas/analyze-media.schema';
-import logger from 'src/infrastructure/logger';
+import { extractJson } from '../../utils/extract-json';
+import { MeetingAnalysisSchema } from '../../../interfaces/schemas/analyze-media.schema';
+import logger from '../../logger';
 
 function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
   const arrayBuffer = new ArrayBuffer(buffer.length);
@@ -30,7 +30,7 @@ export class GeminiProvider {
       }
 
       attempt++;
-      const delay = Math.min(6000 * attempt, 1500);
+      const delay = Math.min(attempt * 2000, 30000);
 
       logger.debug({ attempt, fileName: name }, 'Waiting for media file to become active');
       await new Promise((res) => setTimeout(res, delay));

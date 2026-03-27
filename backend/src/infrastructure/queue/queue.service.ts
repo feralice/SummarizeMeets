@@ -1,9 +1,8 @@
-import logger from 'src/infrastructure/logger';
+import logger from '../logger';
 
 export interface QueueJob {
   meetingId: string;
-  fileBuffer: Buffer;
-  mimeType: string;
+  s3Key: string;
   userId: string;
   title: string;
 }
