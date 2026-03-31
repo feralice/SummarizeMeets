@@ -14,7 +14,9 @@ import { Meeting } from '../../../../core/models/meeting.model';
 export class MeetingDetailsComponent implements OnInit {
   meeting: Meeting | null = null;
   loading = true;
+  downloading = false;
   error: string | null = null;
+  downloadError: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -46,6 +48,26 @@ export class MeetingDetailsComponent implements OnInit {
         this.error = 'Não foi possível carregar os detalhes da reunião.';
         this.loading = false;
         console.error(err);
+      },
+    });
+  }
+
+  downloadRecording(): void {
+    if (!this.meeting?.id || this.downloading) {
+      return;
+    }
+
+    this.downloading = true;
+    this.downloadError = null;
+
+    this.videoService.getMeetingDownloadUrl(this.meeting.id).subscribe({
+      next: (downloadUrl) => {
+        window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+        this.downloading = false;
+      },
+      error: (err) => {
+        this.downloadError = err.message || 'Nao foi possivel gerar o link de download.';
+        this.downloading = false;
       },
     });
   }

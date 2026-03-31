@@ -1,4 +1,4 @@
-<div class="dropzone" [class.has-files]="files.length > 0">
+<div class="dropzone" [class.has-files]="files.length > 0" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
   <div class="icon">🎬</div>
 
   <h3>Arraste seu vídeo ou áudio aqui</h3>

@@ -1,12 +1,13 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { interval } from 'rxjs';
+import { timer } from 'rxjs';
 import { switchMap, takeWhile } from 'rxjs/operators';
 import { VideoService } from './media-analysis.service';
 
 export interface QueueItem {
-  meetingId: string;
+  localId: string;
+  meetingId?: string;
   fileName: string;
-  status: 'queued' | 'processing' | 'completed' | 'failed';
+  status: 'uploading' | 'queued' | 'processing' | 'completed' | 'failed';
   errorMessage?: string;
 }
 
@@ -19,32 +20,61 @@ export class QueueStateService {
   private _queue = signal<QueueItem[]>([]);
   readonly queue = this._queue.asReadonly();
 
-  addItem(item: QueueItem): void {
-    this._queue.update(q => [...q, item]);
-    this.startPolling(item.meetingId);
+  addPendingUpload(fileName: string): string {
+    const localId =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    this._queue.update((queue) => [...queue, { localId, fileName, status: 'uploading' }]);
+    return localId;
   }
 
-  private updateStatus(meetingId: string, status: QueueItem['status'], errorMessage?: string): void {
-    this._queue.update(q =>
-      q.map(i => i.meetingId === meetingId ? { ...i, status, ...(errorMessage ? { errorMessage } : {}) } : i)
+  markQueued(localId: string, meetingId: string): void {
+    this.updateItem(localId, {
+      meetingId,
+      status: 'queued',
+      errorMessage: undefined,
+    });
+
+    this.startPolling(localId, meetingId);
+  }
+
+  markFailed(localId: string, errorMessage?: string): void {
+    this.updateItem(localId, { status: 'failed', errorMessage });
+  }
+
+  private updateStatus(
+    localId: string,
+    status: Extract<QueueItem['status'], 'queued' | 'processing' | 'completed' | 'failed'>,
+    errorMessage?: string
+  ): void {
+    this.updateItem(localId, {
+      status,
+      ...(errorMessage ? { errorMessage } : {}),
+    });
+  }
+
+  private updateItem(localId: string, partial: Partial<QueueItem>): void {
+    this._queue.update((queue) =>
+      queue.map((item) => (item.localId === localId ? { ...item, ...partial } : item))
     );
   }
 
-  private startPolling(meetingId: string): void {
-    // takeWhile with inclusive=true emits the terminal value then completes —
-    // no manual teardown needed; the subscription ends itself when job finishes.
-    interval(POLL_INTERVAL_MS)
+  private startPolling(localId: string, meetingId: string): void {
+    timer(0, POLL_INTERVAL_MS)
       .pipe(
         switchMap(() => this.mediaService.getMeetingById(meetingId)),
-        takeWhile(m => m.status !== 'completed' && m.status !== 'failed', true),
+        takeWhile((meeting) => meeting.status !== 'completed' && meeting.status !== 'failed', true)
       )
       .subscribe({
-        next: (meeting) => this.updateStatus(meetingId, meeting.status as QueueItem['status']),
-        error: (err: any) => this.updateStatus(
-          meetingId,
-          'failed',
-          err?.message || 'Erro de conexão com o servidor'
-        ),
+        next: (meeting) =>
+          this.updateStatus(
+            localId,
+            meeting.status as Extract<QueueItem['status'], 'queued' | 'processing' | 'completed' | 'failed'>
+          ),
+        error: (err: any) =>
+          this.updateStatus(localId, 'failed', err?.message || 'Erro de conexao com o servidor'),
       });
   }
 }

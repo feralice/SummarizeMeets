@@ -1,30 +1,35 @@
 <div class="queue-list" *ngIf="items.length > 0">
   <h3>Resumos em processamento <span class="queue-counter">{{ items.length }}/5</span></h3>
 
+  <p class="queue-hint" *ngIf="hasActiveBackgroundWork">
+    Depois que o arquivo entra na fila, o Gemini continua trabalhando em background. Voce pode abrir outras paginas do sistema sem perder o processamento.
+  </p>
+
   <div class="queue-item" *ngFor="let item of items">
     <div class="item-info">
       <div class="item-main">
         <span class="file-name">{{ item.fileName }}</span>
         <span class="badge" [ngClass]="statusClass(item.status)">
-          <span *ngIf="item.status === 'processing'" class="spinner"></span>
+          <span *ngIf="item.status === 'uploading' || item.status === 'processing'" class="spinner"></span>
           {{ statusLabel(item.status) }}
         </span>
       </div>
+
       <span class="error-detail" *ngIf="item.status === 'failed' && item.errorMessage">
         {{ item.errorMessage }}
       </span>
     </div>
 
     <button
-      *ngIf="item.status === 'completed'"
+      *ngIf="item.status === 'completed' && item.meetingId"
       class="btn-secondary"
-      (click)="viewResult.emit(item.meetingId)"
+      (click)="viewResult.emit(item.meetingId!)"
     >
       Ver resultado
     </button>
   </div>
 
   <div class="queue-footer" *ngIf="allDone">
-    <a routerLink="/history" class="btn-primary">Ir para histórico</a>
+    <a routerLink="/history" class="btn-primary">Ir para historico</a>
   </div>
 </div>

@@ -55,6 +55,13 @@ export class VideoService {
     );
   }
 
+  getMeetingDownloadUrl(id: string): Observable<string> {
+    return this.http.get<{ data: { downloadUrl: string } }>(`${this.apiUrl}/meetings/${id}/download-url`).pipe(
+      map((res) => res.data.downloadUrl),
+      catchError(this.handleError),
+    );
+  }
+
   private handleError(error: HttpErrorResponse | Error) {
     const msg =
       error instanceof Error

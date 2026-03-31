@@ -12,30 +12,49 @@ import { QueueItem } from '../../../../core/services/queue-state.service';
 })
 export class QueueListComponent {
   @Input() items: QueueItem[] = [];
-  @Output() viewResult = new EventEmitter<string>(); // emits meetingId
+  @Output() viewResult = new EventEmitter<string>();
 
   get allDone(): boolean {
-    return this.items.length > 0 &&
-      this.items.every(i => i.status === 'completed' || i.status === 'failed');
+    return this.items.length > 0 && this.items.every((item) => item.status === 'completed' || item.status === 'failed');
+  }
+
+  get hasActiveBackgroundWork(): boolean {
+    return this.items.some(
+      (item) => item.status === 'uploading' || item.status === 'queued' || item.status === 'processing'
+    );
   }
 
   statusLabel(status: QueueItem['status']): string {
     switch (status) {
-      case 'queued': return 'Na fila';
-      case 'processing': return 'Processando...';
-      case 'completed': return 'Concluído';
-      case 'failed': return 'Falhou - tente novamente';
-      default: return 'Concluído';
+      case 'uploading':
+        return 'Enviando arquivo...';
+      case 'queued':
+        return 'Na fila';
+      case 'processing':
+        return 'Processando...';
+      case 'completed':
+        return 'Concluido';
+      case 'failed':
+        return 'Falhou - tente novamente';
+      default:
+        return 'Concluido';
     }
   }
 
   statusClass(status: QueueItem['status']): string {
     switch (status) {
-      case 'queued': return 'badge-gray';
-      case 'processing': return 'badge-blue';
-      case 'completed': return 'badge-green';
-      case 'failed': return 'badge-red';
-      default: return 'badge-green';
+      case 'uploading':
+        return 'badge-indigo';
+      case 'queued':
+        return 'badge-gray';
+      case 'processing':
+        return 'badge-blue';
+      case 'completed':
+        return 'badge-green';
+      case 'failed':
+        return 'badge-red';
+      default:
+        return 'badge-green';
     }
   }
 }

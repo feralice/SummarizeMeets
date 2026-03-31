@@ -18,6 +18,7 @@ export class MeetingPageComponent {
 
   selectedFiles: File[] = [];
   error: string | null = null;
+  backgroundMessage: string | null = null;
   isSubmitting = false;
 
   private mediaService = inject(VideoService);
@@ -37,30 +38,41 @@ export class MeetingPageComponent {
 
     const files = [...this.selectedFiles];
     this.error = null;
+    this.backgroundMessage = null;
     this.isSubmitting = true;
 
     let remaining = files.length;
+    let queuedCount = 0;
     const errors: string[] = [];
 
     const onDone = () => {
-      if (--remaining > 0) return;
+      remaining -= 1;
+      if (remaining > 0) return;
+
       this.isSubmitting = false;
       this.uploaderRef.removeFile();
       this.selectedFiles = [];
-      if (errors.length) this.error = errors.join('\n');
+
+      if (queuedCount > 0) {
+        this.backgroundMessage = `${queuedCount} arquivo(s) enviado(s). O Gemini continua processando em background e voce pode seguir navegando.`;
+      }
+
+      if (errors.length) {
+        this.error = errors.join('\n');
+      }
     };
 
     for (const file of files) {
+      const localId = this.queueState.addPendingUpload(file.name);
+
       this.mediaService.analyzeVideo(file).subscribe({
         next: (res) => {
-          this.queueState.addItem({
-            meetingId: res.meetingId,
-            fileName: file.name,
-            status: 'queued',
-          });
+          queuedCount += 1;
+          this.queueState.markQueued(localId, res.meetingId);
           onDone();
         },
         error: (err) => {
+          this.queueState.markFailed(localId, err.message);
           errors.push(`${file.name}: ${err.message}`);
           onDone();
         },

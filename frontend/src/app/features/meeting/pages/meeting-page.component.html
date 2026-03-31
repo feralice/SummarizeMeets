@@ -1,7 +1,7 @@
 <main class="container">
   <section class="hero">
-    <h1>Simplifique suas reuniões</h1>
-    <p>Envie um vídeo e receba um resumo em minutos</p>
+    <h1>Simplifique suas reunioes</h1>
+    <p>Envie um video e receba um resumo em minutos</p>
   </section>
 
   <app-file-uploader
@@ -10,13 +10,15 @@
     [isProcessing]="isSubmitting"
   ></app-file-uploader>
 
+  <div *ngIf="backgroundMessage" class="info-box">
+    <h3>Processamento em background</h3>
+    <p>{{ backgroundMessage }}</p>
+  </div>
+
   <div *ngIf="error" class="error-box">
     <h3>Erro</h3>
     <p>{{ error }}</p>
   </div>
 
-  <app-queue-list
-    [items]="queue"
-    (viewResult)="onViewResult($event)"
-  ></app-queue-list>
+  <app-queue-list [items]="queue" (viewResult)="onViewResult($event)"></app-queue-list>
 </main>

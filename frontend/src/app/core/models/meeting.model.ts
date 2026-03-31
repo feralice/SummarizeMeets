@@ -23,6 +23,8 @@ export interface Meeting {
     description: string;
   }[];
   status: string;
+  errorMessage?: string | null;
+  s3Key?: string | null;
   userId: string;
   createdAt: string;
   updatedAt: string;
