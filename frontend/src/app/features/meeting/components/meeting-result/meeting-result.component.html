@@ -1,5 +1,5 @@
 <div class="modal-backdrop">
-  <div class="modal-card" #modalContent>
+  <div class="modal-card">
     <header class="modal-header">
       <div>
         <h2>Resumo da reunião</h2>
@@ -7,6 +7,7 @@
       </div>
 
       <div class="header-actions no-print">
+        <button class="export-btn" (click)="exportToMarkdown()">Exportar MD</button>
         <button class="export-btn" (click)="exportToPdf()">Exportar PDF</button>
         <button class="close-btn" (click)="closeModal()">×</button>
       </div>

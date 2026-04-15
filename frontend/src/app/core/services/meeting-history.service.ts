@@ -26,8 +26,8 @@ export class MeetingHistoryService {
   constructor(private http: HttpClient) {}
 
   getHistory(): Observable<MeetingDto[]> {
-    return this.http.get<MeetingDto[]>(this.apiUrl).pipe(
-      map((res) => res || []),
+    return this.http.get<{ data: MeetingDto[] }>(this.apiUrl).pipe(
+      map((res) => res.data || []),
       catchError(this.handleError),
     );
   }

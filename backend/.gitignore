@@ -122,3 +122,6 @@ dist
 /src/generated/prisma
 .env
 .idea
+
+# Jest HTML report (generated on every test run)
+test-report/

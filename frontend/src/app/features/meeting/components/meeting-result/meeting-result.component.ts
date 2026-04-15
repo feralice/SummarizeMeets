@@ -1,8 +1,7 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { MeetingAnalysis } from '../../../../core/models/meeting-analysis.model';
+import { buildMarkdown, buildPdf, downloadMarkdown } from '../../../../core/utils/export.utils';
 
 @Component({
   selector: 'app-meeting-result',
@@ -13,48 +12,35 @@ import { MeetingAnalysis } from '../../../../core/models/meeting-analysis.model'
 })
 export class MeetingResultComponent {
   @Input() result!: MeetingAnalysis;
-
   @Output() close = new EventEmitter<void>();
-
-  @ViewChild('modalContent', { static: true })
-  private modalContent!: ElementRef<HTMLElement>;
 
   closeModal(): void {
     this.close.emit();
   }
 
-  async exportToPdf(): Promise<void> {
-    const source = this.modalContent.nativeElement;
-    const clone = source.cloneNode(true) as HTMLElement;
-
-    clone.querySelectorAll('.no-print').forEach((el) => el.remove());
-
-    Object.assign(clone.style, {
-      maxHeight: 'none',
-      overflow: 'visible',
-      width: '960px',
-      position: 'fixed',
-      top: '0',
-      left: '-9999px',
-      background: '#ffffff',
+  exportToMarkdown(): void {
+    const r = this.result;
+    const content = buildMarkdown({
+      title: r.summary.introduction.split('.')[0],
+      summary: r.summary,
+      topics: r.topics,
+      decisions: r.decisions,
+      actionItems: r.action_items,
+      speakers: r.speakers,
     });
+    downloadMarkdown(content, 'resumo-reuniao');
+  }
 
-    document.body.appendChild(clone);
-
-    const canvas = await html2canvas(clone, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: true,
+  exportToPdf(): void {
+    const r = this.result;
+    const pdf = buildPdf({
+      title: r.summary.introduction.split('.')[0],
+      summary: r.summary,
+      topics: r.topics,
+      decisions: r.decisions,
+      actionItems: r.action_items,
+      speakers: r.speakers,
     });
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const margin = 10;
-    const width = pdf.internal.pageSize.getWidth() - margin * 2;
-    const height = (canvas.height * width) / canvas.width;
-
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, width, height);
     pdf.save('resumo-reuniao.pdf');
-
-    document.body.removeChild(clone);
   }
 }

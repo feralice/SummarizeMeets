@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
 import { loadConfig } from './infrastructure/config/app-config';
 import logger from './infrastructure/logger';
 import { createMediaRouter } from './interfaces/http/media-upload.router';
@@ -9,6 +10,7 @@ import userRouter from './interfaces/http/user.router';
 import meetingRouter from './interfaces/http/meeting.router';
 import meetingsRouter from './interfaces/http/meetings.router';
 import authRouter from './interfaces/http/auth.router';
+import { generateOpenApiDocument } from './interfaces/http/swagger';
 import { QueueService, QueueJob } from './infrastructure/queue/queue.service';
 import { GeminiProvider } from './infrastructure/providers/gemini/gemini-provider';
 import { S3Provider } from './infrastructure/providers/s3/s3-provider';
@@ -44,6 +46,10 @@ async function main() {
     }
   });
 
+  const openApiDoc = generateOpenApiDocument();
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiDoc));
+  app.get('/api/docs.json', (_req, res) => res.json(openApiDoc));
+
   app.use('/api', authRouter);
   app.use('/api', createMediaRouter(queueService, s3Provider));
   app.use('/api', userRouter);
@@ -52,6 +58,9 @@ async function main() {
 
   app.listen(PORT, () => {
     logger.info({ port: PORT, env: process.env.NODE_ENV || 'local' }, 'Server started');
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'local') {
+      logger.info(`API Docs: http://localhost:${PORT}/api/docs`);
+    }
   });
 }
 

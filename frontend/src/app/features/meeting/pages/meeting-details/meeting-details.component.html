@@ -24,6 +24,14 @@
         }}
       </div>
 
+      @if (meeting.status === 'completed') {
+      <button class="btn-secondary" type="button" (click)="exportToMarkdown()">
+        Exportar MD
+      </button>
+      <button class="btn-secondary" type="button" (click)="exportToPdf()" [disabled]="exporting">
+        {{ exporting ? 'Gerando PDF...' : 'Exportar PDF' }}
+      </button>
+      }
       <button
         class="btn-secondary"
         type="button"

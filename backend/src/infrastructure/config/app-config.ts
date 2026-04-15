@@ -25,6 +25,11 @@ export async function loadConfig(): Promise<void> {
 }
 
 async function tryLoadFromAWS(): Promise<boolean> {
+  if (process.env.SKIP_AWS_CONFIG === 'true') {
+    logger.info('SKIP_AWS_CONFIG=true — skipping AWS, using .env');
+    return false;
+  }
+
   const region = process.env.AWS_REGION || 'us-east-1';
 
   try {

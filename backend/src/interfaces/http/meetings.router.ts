@@ -30,7 +30,7 @@ meetingsRouter.get('/history', authMiddleware, async (req, res) => {
       updatedAt: meeting.updatedAt,
     }));
 
-    return res.status(HttpStatus.HTTP_STATUS_OK).json(result);
+    return res.status(HttpStatus.HTTP_STATUS_OK).json({ data: result });
   } catch (err: any) {
     return res.status(HttpStatus.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }

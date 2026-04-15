@@ -3,6 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { VideoService } from '../../../../core/services/media-analysis.service';
 import { Meeting } from '../../../../core/models/meeting.model';
+import { buildMarkdown, buildPdf, downloadMarkdown } from '../../../../core/utils/export.utils';
 
 @Component({
   selector: 'app-meeting-details',
@@ -12,9 +13,11 @@ import { Meeting } from '../../../../core/models/meeting.model';
   styleUrls: ['./meeting-details.component.css'],
 })
 export class MeetingDetailsComponent implements OnInit {
+
   meeting: Meeting | null = null;
   loading = true;
   downloading = false;
+  exporting = false;
   error: string | null = null;
   downloadError: string | null = null;
 
@@ -50,6 +53,38 @@ export class MeetingDetailsComponent implements OnInit {
         console.error(err);
       },
     });
+  }
+
+  exportToMarkdown(): void {
+    if (!this.meeting) return;
+    const m = this.meeting;
+    const content = buildMarkdown({
+      title: m.meetingTitle,
+      date: new Date(m.meetingDate).toLocaleDateString('pt-BR'),
+      summary: m.summary,
+      topics: m.topics,
+      decisions: m.decisions,
+      actionItems: m.actionItems,
+      speakers: m.speakers,
+    });
+    downloadMarkdown(content, m.meetingTitle.replace(/\s+/g, '-'));
+  }
+
+  exportToPdf(): void {
+    if (!this.meeting || this.exporting) return;
+    this.exporting = true;
+    const m = this.meeting;
+    const pdf = buildPdf({
+      title: m.meetingTitle,
+      date: new Date(m.meetingDate).toLocaleDateString('pt-BR'),
+      summary: m.summary,
+      topics: m.topics,
+      decisions: m.decisions,
+      actionItems: m.actionItems,
+      speakers: m.speakers,
+    });
+    pdf.save(`${m.meetingTitle.replace(/\s+/g, '-')}.pdf`);
+    this.exporting = false;
   }
 
   downloadRecording(): void {
