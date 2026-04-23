@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { BadRequestError, UnauthorizedError } from '../../domain/errors';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 
 interface LoginInput {
@@ -23,17 +24,17 @@ export class LoginUserUseCase {
     const { email, password } = input;
 
     if (!email || !password) {
-      throw new Error('Email and password are required');
+      throw new BadRequestError('Email and password are required');
     }
 
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      throw new Error('Invalid credentials');
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const secret = process.env.JWT_SECRET;

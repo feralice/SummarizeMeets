@@ -1,5 +1,13 @@
+import { Meeting as PrismaMeeting } from '@prisma/client';
 import { Meeting } from '../../domain/entities/Meeting';
-import { AnalysisResults, IMeetingRepository } from '../../domain/repositories/IMeetingRepository';
+import {
+  AnalysisResults,
+  IMeetingRepository,
+  MeetingFilters,
+  MeetingPagination,
+  PaginatedMeetings,
+  UpdateMeetingFields,
+} from '../../domain/repositories/IMeetingRepository';
 import { prisma } from '../database/prisma';
 
 export class PrismaMeetingRepository implements IMeetingRepository {
@@ -19,47 +27,12 @@ export class PrismaMeetingRepository implements IMeetingRepository {
       },
     });
 
-    return new Meeting({
-      id: createdMeeting.id,
-      meetingTitle: createdMeeting.meetingTitle,
-      meetingDate: createdMeeting.meetingDate,
-      summary: createdMeeting.summary,
-      topics: createdMeeting.topics as any[],
-      decisions: createdMeeting.decisions as string[],
-      actionItems: createdMeeting.actionItems as any[],
-      speakers: createdMeeting.speakers as any[],
-      status: createdMeeting.status,
-      errorMessage: createdMeeting.errorMessage,
-      s3Key: createdMeeting.s3Key,
-      userId: createdMeeting.userId,
-      createdAt: createdMeeting.createdAt,
-      updatedAt: createdMeeting.updatedAt,
-    });
+    return this.toDomain(createdMeeting);
   }
 
   async findById(id: string): Promise<Meeting | null> {
-    const meeting = await prisma.meeting.findUnique({
-      where: { id },
-    });
-
-    if (!meeting) return null;
-
-    return new Meeting({
-      id: meeting.id,
-      meetingTitle: meeting.meetingTitle,
-      meetingDate: meeting.meetingDate,
-      summary: meeting.summary,
-      topics: meeting.topics as any[],
-      decisions: meeting.decisions as string[],
-      actionItems: meeting.actionItems as any[],
-      speakers: meeting.speakers as any[],
-      status: meeting.status,
-      errorMessage: meeting.errorMessage,
-      s3Key: meeting.s3Key,
-      userId: meeting.userId,
-      createdAt: meeting.createdAt,
-      updatedAt: meeting.updatedAt,
-    });
+    const meeting = await prisma.meeting.findUnique({ where: { id } });
+    return meeting ? this.toDomain(meeting) : null;
   }
 
   async updateStatus(id: string, status: string, errorMessage?: string): Promise<void> {
@@ -83,30 +56,84 @@ export class PrismaMeetingRepository implements IMeetingRepository {
     });
   }
 
-  async findByUserId(userId: string): Promise<Meeting[]> {
-    const meetings = await prisma.meeting.findMany({
-      where: { userId },
-      orderBy: { meetingDate: 'desc' },
+  async updateFields(id: string, fields: UpdateMeetingFields): Promise<Meeting> {
+    const updated = await prisma.meeting.update({
+      where: { id },
+      data: {
+        ...(fields.meetingTitle !== undefined && { meetingTitle: fields.meetingTitle }),
+        ...(fields.summary !== undefined && { summary: fields.summary }),
+        ...(fields.topics !== undefined && { topics: fields.topics }),
+        ...(fields.decisions !== undefined && { decisions: fields.decisions }),
+        ...(fields.actionItems !== undefined && { actionItems: fields.actionItems }),
+        ...(fields.speakers !== undefined && { speakers: fields.speakers }),
+      },
     });
 
-    return meetings.map(
-      (meeting) =>
-        new Meeting({
-          id: meeting.id,
-          meetingTitle: meeting.meetingTitle,
-          meetingDate: meeting.meetingDate,
-          summary: meeting.summary,
-          topics: meeting.topics as any[],
-          decisions: meeting.decisions as string[],
-          actionItems: meeting.actionItems as any[],
-          speakers: meeting.speakers as any[],
-          status: meeting.status,
-          errorMessage: meeting.errorMessage,
-          s3Key: meeting.s3Key,
-          userId: meeting.userId,
-          createdAt: meeting.createdAt,
-          updatedAt: meeting.updatedAt,
-        })
-    );
+    return this.toDomain(updated);
+  }
+
+  async delete(id: string): Promise<void> {
+    await prisma.meeting.delete({ where: { id } });
+  }
+
+  async findByUserId(
+    userId: string,
+    filters?: MeetingFilters,
+    pagination?: MeetingPagination
+  ): Promise<PaginatedMeetings> {
+    const where = {
+      userId,
+      ...(filters?.search && {
+        meetingTitle: { contains: filters.search, mode: 'insensitive' as const },
+      }),
+      ...((filters?.dateFrom || filters?.dateTo) && {
+        meetingDate: {
+          ...(filters.dateFrom && { gte: new Date(filters.dateFrom) }),
+          ...(filters.dateTo && { lte: new Date(`${filters.dateTo}T23:59:59`) }),
+        },
+      }),
+    };
+
+    const page = pagination?.page ?? 1;
+    const total = await prisma.meeting.count({ where });
+    const pageSize = pagination?.pageSize ?? (total || 1);
+    const skip = pagination ? (page - 1) * pageSize : undefined;
+    const take = pagination ? pageSize : undefined;
+
+    const meetings = await prisma.meeting.findMany({
+      where,
+      orderBy: { meetingDate: 'desc' },
+      ...(skip !== undefined && { skip }),
+      ...(take !== undefined && { take }),
+    });
+
+    return {
+      data: meetings.map((meeting) => this.toDomain(meeting)),
+      meta: {
+        total,
+        page,
+        pageSize,
+        hasNextPage: page * pageSize < total,
+      },
+    };
+  }
+
+  private toDomain(meeting: PrismaMeeting): Meeting {
+    return new Meeting({
+      id: meeting.id,
+      meetingTitle: meeting.meetingTitle,
+      meetingDate: meeting.meetingDate,
+      summary: meeting.summary,
+      topics: meeting.topics as any[],
+      decisions: meeting.decisions as string[],
+      actionItems: meeting.actionItems as any[],
+      speakers: meeting.speakers as any[],
+      status: meeting.status,
+      errorMessage: meeting.errorMessage,
+      s3Key: meeting.s3Key,
+      userId: meeting.userId,
+      createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt,
+    });
   }
 }
