@@ -1,17 +1,22 @@
 <header class="navbar">
-  <div class="brand" routerLink="/" style="cursor: pointer;">
+  <div class="brand" routerLink="/" style="cursor: pointer;" (click)="closeMenu()">
     <span class="title">SummarizeMeets</span>
   </div>
 
-  <div class="nav-actions">
-    <a routerLink="/" class="btn-text" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Nova
-      Análise</a>
-    <a routerLink="/history" class="btn-text" routerLinkActive="active">Histórico</a>
+  <button class="hamburger" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-label="Menu">
+    <span class="bar" [class.open]="menuOpen"></span>
+    <span class="bar" [class.open]="menuOpen"></span>
+    <span class="bar" [class.open]="menuOpen"></span>
+  </button>
+
+  <div class="nav-actions" [class.open]="menuOpen">
+    <a routerLink="/" class="btn-text" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Nova Análise</a>
+    <a routerLink="/history" class="btn-text" routerLinkActive="active" (click)="closeMenu()">Histórico</a>
     @if (isAuthenticated) {
-      <a routerLink="/profile" class="user-name" routerLinkActive="active">{{ currentUser?.name }}</a>
-      <button class="btn-primary" (click)="onLogout()">Sair</button>
+      <a routerLink="/profile" class="user-name" routerLinkActive="active" (click)="closeMenu()">{{ currentUser?.name }}</a>
+      <button class="btn-primary" (click)="onLogout(); closeMenu()">Sair</button>
     } @else {
-      <button class="btn-primary" (click)="onLoginClick()">Login</button>
+      <button class="btn-primary" (click)="onLoginClick(); closeMenu()">Login</button>
     }
   </div>
 </header>

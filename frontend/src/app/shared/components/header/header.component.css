@@ -6,6 +6,9 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .brand {
@@ -14,9 +17,6 @@
   font-size: 20px;
   font-weight: 700;
   align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
 .title {
@@ -30,14 +30,6 @@
   display: flex;
   gap: 16px;
   align-items: center;
-}
-
-.user-info {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding-left: 16px;
-  border-left: 1px solid #e2e8f0;
 }
 
 .user-name {
@@ -91,32 +83,6 @@
   background: #fca5a5;
 }
 
-@media (max-width: 768px) {
-  .navbar {
-    padding: 12px 16px;
-  }
-
-  .nav-actions {
-    gap: 8px;
-  }
-
-  .btn-text,
-  .btn-primary,
-  .btn-danger {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  .user-name {
-    display: none;
-  }
-
-  .user-info {
-    padding-left: 0;
-    border-left: none;
-  }
-}
-
 .nav-actions a {
   text-decoration: none;
   font-size: 14px;
@@ -143,4 +109,78 @@
   height: 2px;
   background: #2563eb;
   border-radius: 2px;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.bar {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #2563eb;
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.bar:nth-child(1).open { transform: translateY(7px) rotate(45deg); }
+.bar:nth-child(2).open { opacity: 0; }
+.bar:nth-child(3).open { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 640px) {
+  .navbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-actions {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 0 8px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 12px;
+  }
+
+  .nav-actions.open {
+    display: flex;
+  }
+
+  .nav-actions a,
+  .nav-actions .btn-text {
+    width: 100%;
+    padding: 10px 8px;
+    border-radius: 6px;
+  }
+
+  .nav-actions a.active::after {
+    display: none;
+  }
+
+  .nav-actions .btn-primary {
+    width: 100%;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .user-name {
+    max-width: 100%;
+    color: #2563eb;
+    font-weight: 600;
+  }
 }

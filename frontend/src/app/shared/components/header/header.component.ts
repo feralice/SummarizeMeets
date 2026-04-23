@@ -14,6 +14,15 @@ import { RouterModule } from '@angular/router';
 export class HeaderComponent implements OnInit {
   currentUser: AuthUser | null = null;
   isAuthenticated = false;
+  menuOpen = false;
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu() {
+    this.menuOpen = false;
+  }
 
   constructor(
     private authService: AuthService,

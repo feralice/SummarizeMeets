@@ -26,6 +26,7 @@
         class="filter-input date-input"
         type="date"
         [(ngModel)]="dateFrom"
+        [max]="today"
         (change)="onDateChange()"
         title="De"
       />
@@ -34,6 +35,7 @@
         class="filter-input date-input"
         type="date"
         [(ngModel)]="dateTo"
+        [max]="today"
         (change)="onDateChange()"
         title="Até"
       />
