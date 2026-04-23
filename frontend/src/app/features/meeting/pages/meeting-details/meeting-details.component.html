@@ -3,7 +3,28 @@
     <div class="header-copy">
       <button class="btn-back" (click)="goBack()">Voltar</button>
       <div class="header-main">
-        <h1>{{ meeting?.meetingTitle }}</h1>
+        @if (editingTitle) {
+        <div class="inline-edit-row">
+          <input
+            class="edit-input title-input"
+            [(ngModel)]="titleDraft"
+            (keyup.enter)="saveTitle()"
+            (keyup.escape)="cancelEditTitle()"
+            autofocus
+          />
+          <button class="btn-save" (click)="saveTitle()" [disabled]="saving">
+            {{ saving ? 'Salvando...' : 'Salvar' }}
+          </button>
+          <button class="btn-cancel" (click)="cancelEditTitle()" [disabled]="saving">Cancelar</button>
+        </div>
+        } @else {
+        <h1>
+          {{ meeting?.meetingTitle }}
+          @if (meeting?.status === 'completed') {
+          <button class="btn-edit-icon" (click)="startEditTitle()" title="Editar título">✏️</button>
+          }
+        </h1>
+        }
         <p class="date">{{ meeting?.meetingDate | date: 'dd/MM/yyyy HH:mm' }}</p>
       </div>
     </div>
@@ -25,9 +46,7 @@
       </div>
 
       @if (meeting.status === 'completed') {
-      <button class="btn-secondary" type="button" (click)="exportToMarkdown()">
-        Exportar MD
-      </button>
+      <button class="btn-secondary" type="button" (click)="exportToMarkdown()">Exportar MD</button>
       <button class="btn-secondary" type="button" (click)="exportToPdf()" [disabled]="exporting">
         {{ exporting ? 'Gerando PDF...' : 'Exportar PDF' }}
       </button>
@@ -38,11 +57,37 @@
         (click)="downloadRecording()"
         [disabled]="!meeting.s3Key || downloading"
       >
-        {{ downloading ? 'Gerando link...' : 'Baixar gravacao' }}
+        {{ downloading ? 'Gerando link...' : 'Baixar gravação' }}
       </button>
+      <button class="btn-delete-header" type="button" (click)="requestDelete()">Excluir</button>
     </div>
     }
   </header>
+
+  @if (showDeleteConfirm) {
+  <div class="delete-modal-overlay" (click)="cancelDelete()">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <h3>Excluir reunião?</h3>
+      <p>Esta ação não pode ser desfeita. O resumo e a gravação serão removidos permanentemente.</p>
+      <div class="delete-modal-actions">
+        <button class="btn-cancel-modal" (click)="cancelDelete()" [disabled]="deleting">Cancelar</button>
+        <button class="btn-confirm-modal" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Excluindo...' : 'Sim, excluir' }}
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (deleteError) {
+  <div class="inline-error save-error">{{ deleteError }}</div>
+  }
+  @if (saveError) {
+  <div class="inline-error save-error">{{ saveError }}</div>
+  }
+  @if (saveSuccess) {
+  <div class="inline-success save-error">{{ saveSuccess }}</div>
+  }
 
   @if (loading) {
   <div class="loading-state">
@@ -62,40 +107,107 @@
   <div class="analysis-content">
     <div class="card">
       @if (downloadError) {
-      <div class="inline-error">
-        {{ downloadError }}
-      </div>
+      <div class="inline-error">{{ downloadError }}</div>
       }
 
       @if (meeting.status === 'failed' && meeting.errorMessage) {
-      <div class="inline-error">
-        Falha no processamento: {{ meeting.errorMessage }}
-      </div>
+      <div class="inline-error">Falha no processamento: {{ meeting.errorMessage }}</div>
       }
 
       @if (meeting.summary) {
       <section class="block">
         <h3>Resumo</h3>
-        <p class="introduction">{{ meeting.summary.introduction }}</p>
 
-        @if (meeting.summary.key_points) {
+        @if (editingSection === 'introduction') {
+        <div class="inline-edit-block">
+          <textarea class="edit-textarea" [(ngModel)]="introductionDraft" rows="5"></textarea>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveIntroduction()" [disabled]="saving">
+              {{ saving ? 'Salvando...' : 'Salvar' }}
+            </button>
+            <button class="btn-cancel" (click)="cancelEditSection()" [disabled]="saving">Cancelar</button>
+          </div>
+        </div>
+        } @else {
+        <p class="introduction editable-field" (click)="meeting.status === 'completed' && startEditIntroduction()">
+          {{ meeting.summary.introduction }}
+          @if (meeting.status === 'completed') {
+          <span class="edit-hint">clique para editar</span>
+          }
+        </p>
+        }
+
         <div class="key-points">
-          <h4>Pontos principais</h4>
+          <h4>
+            Pontos principais
+            @if (meeting.status === 'completed') {
+            <button class="btn-edit-icon" (click)="startEditKeyPoints()" title="Editar pontos principais">✏️</button>
+            }
+          </h4>
+          @if (editingSection === 'keyPoints') {
+          <div class="inline-edit-block">
+            <textarea class="edit-textarea" [(ngModel)]="keyPointsDraft" rows="6"></textarea>
+            <p class="field-help">Um ponto por linha.</p>
+            <div class="edit-actions">
+              <button class="btn-save" (click)="saveKeyPoints()" [disabled]="saving">
+                {{ saving ? 'Salvando...' : 'Salvar' }}
+              </button>
+              <button class="btn-cancel" (click)="cancelEditSection()" [disabled]="saving">Cancelar</button>
+            </div>
+          </div>
+          } @else {
           <ul class="bullet-list">
             @for (point of meeting.summary.key_points; track $index) {
             <li>{{ point }}</li>
             }
           </ul>
+          }
         </div>
-        }
 
-        <p class="conclusion">{{ meeting.summary.conclusion }}</p>
+        @if (editingSection === 'conclusion') {
+        <div class="inline-edit-block">
+          <textarea class="edit-textarea" [(ngModel)]="conclusionDraft" rows="4"></textarea>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveConclusion()" [disabled]="saving">
+              {{ saving ? 'Salvando...' : 'Salvar' }}
+            </button>
+            <button class="btn-cancel" (click)="cancelEditSection()" [disabled]="saving">Cancelar</button>
+          </div>
+        </div>
+        } @else {
+        <p class="conclusion editable-field" (click)="meeting.status === 'completed' && startEditConclusion()">
+          {{ meeting.summary.conclusion }}
+          @if (meeting.status === 'completed') {
+          <span class="edit-hint">clique para editar</span>
+          }
+        </p>
+        }
       </section>
       }
 
-      @if (meeting.topics.length) {
       <section class="block">
-        <h3>Topicos discutidos</h3>
+        <h3>
+          Tópicos discutidos
+          @if (meeting.status === 'completed') {
+          <button class="btn-edit-icon" (click)="startEditTopics()" title="Editar tópicos">✏️</button>
+          }
+        </h3>
+        @if (editingSection === 'topics') {
+        <div class="editor-list">
+          @for (topic of topicsDraft; track $index) {
+          <div class="editor-card">
+            <input class="edit-input form-input" [(ngModel)]="topic.title" placeholder="Título" />
+            <textarea class="edit-textarea compact" [(ngModel)]="topic.description" rows="3" placeholder="Descrição"></textarea>
+            <button class="btn-link-danger" type="button" (click)="removeTopic($index)">Remover</button>
+          </div>
+          }
+          <button class="btn-cancel" type="button" (click)="addTopic()">Adicionar tópico</button>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveTopics()" [disabled]="saving">{{ saving ? 'Salvando...' : 'Salvar' }}</button>
+            <button class="btn-cancel" (click)="cancelEditSection()" [disabled]="saving">Cancelar</button>
+          </div>
+        </div>
+        } @else if (meeting.topics.length) {
         <div class="topic-grid">
           @for (topic of meeting.topics; track $index) {
           <div class="topic-card">
@@ -104,47 +216,106 @@
           </div>
           }
         </div>
+        }
       </section>
-      }
 
-      @if (meeting.decisions.length) {
       <section class="block">
-        <h3>Decisoes tomadas</h3>
+        <h3>
+          Decisões tomadas
+          @if (meeting.status === 'completed') {
+          <button class="btn-edit-icon" (click)="startEditDecisions()" title="Editar decisões">✏️</button>
+          }
+        </h3>
+        @if (editingSection === 'decisions') {
+        <div class="inline-edit-block">
+          <textarea class="edit-textarea" [(ngModel)]="decisionsDraft" rows="6"></textarea>
+          <p class="field-help">Uma decisão por linha.</p>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveDecisions()" [disabled]="saving">{{ saving ? 'Salvando...' : 'Salvar' }}</button>
+            <button class="btn-cancel" (click)="cancelEditSection()" [disabled]="saving">Cancelar</button>
+          </div>
+        </div>
+        } @else if (meeting.decisions.length) {
         <ul class="bullet-list">
           @for (decision of meeting.decisions; track $index) {
           <li>{{ decision }}</li>
           }
         </ul>
+        }
       </section>
-      }
 
-      @if (meeting.actionItems.length) {
       <section class="block">
-        <h3>Proximos passos</h3>
+        <h3>
+          Próximos passos
+          @if (meeting.status === 'completed') {
+          <button class="btn-edit-icon" (click)="startEditActionItems()" title="Editar próximos passos">✏️</button>
+          }
+        </h3>
+        @if (editingSection === 'actionItems') {
+        <div class="editor-list">
+          @for (item of actionItemsDraft; track $index) {
+          <div class="editor-card">
+            <input class="edit-input form-input" [(ngModel)]="item.task" placeholder="Tarefa" />
+            <input class="edit-input form-input" [(ngModel)]="item.responsible" placeholder="Responsável" />
+            <input class="edit-input form-input" [(ngModel)]="item.deadline" placeholder="AAAA-MM-DD" />
+            <label class="checkbox-row">
+              <input type="checkbox" [(ngModel)]="item.needs_review" />
+              Precisa revisão
+            </label>
+            <button class="btn-link-danger" type="button" (click)="removeActionItem($index)">Remover</button>
+          </div>
+          }
+          <button class="btn-cancel" type="button" (click)="addActionItem()">Adicionar próximo passo</button>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveActionItems()" [disabled]="saving">{{ saving ? 'Salvando...' : 'Salvar' }}</button>
+            <button class="btn-cancel" (click)="cancelEditSection()" [disabled]="saving">Cancelar</button>
+          </div>
+        </div>
+        } @else if (meeting.actionItems.length) {
         <div class="action-grid">
           @for (item of meeting.actionItems; track $index) {
           <div class="action-item">
             <p class="task">{{ item.task }}</p>
             <div class="meta">
               @if (item.responsible) {
-              <span class="badge responsible">Responsavel: {{ item.responsible }}</span>
+              <span class="badge responsible">Responsável: {{ item.responsible }}</span>
               }
               @if (item.deadline) {
               <span class="badge deadline">Prazo: {{ item.deadline }}</span>
               }
               @if (item.needs_review) {
-              <span class="badge review">Needs review</span>
+              <span class="badge review">Precisa revisão</span>
               }
             </div>
           </div>
           }
         </div>
+        }
       </section>
-      }
 
-      @if (meeting.speakers.length) {
       <section class="block">
-        <h3>Participantes</h3>
+        <h3>
+          Participantes
+          @if (meeting.status === 'completed') {
+          <button class="btn-edit-icon" (click)="startEditSpeakers()" title="Editar participantes">✏️</button>
+          }
+        </h3>
+        @if (editingSection === 'speakers') {
+        <div class="editor-list">
+          @for (speaker of speakersDraft; track $index) {
+          <div class="editor-card">
+            <input class="edit-input form-input" [(ngModel)]="speaker.speaker" placeholder="Nome" />
+            <textarea class="edit-textarea compact" [(ngModel)]="speaker.description" rows="3" placeholder="Descrição"></textarea>
+            <button class="btn-link-danger" type="button" (click)="removeSpeaker($index)">Remover</button>
+          </div>
+          }
+          <button class="btn-cancel" type="button" (click)="addSpeaker()">Adicionar participante</button>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveSpeakers()" [disabled]="saving">{{ saving ? 'Salvando...' : 'Salvar' }}</button>
+            <button class="btn-cancel" (click)="cancelEditSection()" [disabled]="saving">Cancelar</button>
+          </div>
+        </div>
+        } @else if (meeting.speakers.length) {
         <div class="speaker-grid">
           @for (speaker of meeting.speakers; track $index) {
           <div class="speaker-card">
@@ -153,8 +324,8 @@
           </div>
           }
         </div>
+        }
       </section>
-      }
     </div>
   </div>
   }

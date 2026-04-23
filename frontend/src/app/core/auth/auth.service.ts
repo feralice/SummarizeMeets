@@ -1,8 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface LoginRequest {
   email: string;
@@ -11,11 +19,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  user: AuthUser;
 }
 
 export interface RegisterRequest {
@@ -29,7 +33,7 @@ export interface RegisterRequest {
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
-  private currentUserSubject = new BehaviorSubject<any>(null);
+  private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
@@ -50,11 +54,38 @@ export class AuthService {
     );
   }
 
+  getProfile(): Observable<AuthUser> {
+    return this.http.get<{ data: AuthUser }>(`${this.apiUrl}/profile`).pipe(
+      map((res) => res.data),
+      tap((user) => this.updateStoredUser(user)),
+    );
+  }
+
+  updateProfile(data: { name: string }): Observable<AuthUser> {
+    return this.http.patch<{ data: AuthUser }>(`${this.apiUrl}/profile`, data).pipe(
+      map((res) => res.data),
+      tap((user) => this.updateStoredUser(user)),
+    );
+  }
+
+  changePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/profile/password`, data);
+  }
+
   private setSession(response: LoginResponse): void {
     localStorage.setItem('auth_token', response.token);
     localStorage.setItem('user', JSON.stringify(response.user));
     this.currentUserSubject.next(response.user);
     this.isAuthenticatedSubject.next(true);
+  }
+
+  private updateStoredUser(user: AuthUser): void {
+    localStorage.setItem('user', JSON.stringify(user));
+    this.currentUserSubject.next(user);
   }
 
   logout(): void {

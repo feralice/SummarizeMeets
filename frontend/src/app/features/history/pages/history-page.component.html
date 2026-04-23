@@ -4,28 +4,76 @@
     <a routerLink="/" class="btn-new">+ Nova análise</a>
   </header>
 
-  <!-- LOADING -->
+  <div *ngIf="successMessage" class="toast-success">{{ successMessage }}</div>
+  <div *ngIf="deleteError" class="toast-error">{{ deleteError }}</div>
+
+  <div class="filter-bar">
+    <div class="search-wrapper">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9 3a6 6 0 100 12A6 6 0 009 3zM1 9a8 8 0 1114.32 4.906l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387A8 8 0 011 9z" clip-rule="evenodd"/>
+      </svg>
+      <input
+        class="filter-input search-input"
+        type="text"
+        placeholder="Buscar por título..."
+        [(ngModel)]="searchTerm"
+        (input)="onSearchInput()"
+      />
+    </div>
+
+    <div class="date-range">
+      <input
+        class="filter-input date-input"
+        type="date"
+        [(ngModel)]="dateFrom"
+        (change)="onDateChange()"
+        title="De"
+      />
+      <span class="date-sep">até</span>
+      <input
+        class="filter-input date-input"
+        type="date"
+        [(ngModel)]="dateTo"
+        (change)="onDateChange()"
+        title="Até"
+      />
+    </div>
+
+    <button *ngIf="hasActiveFilters" class="btn-clear-filters" (click)="clearFilters()">
+      Limpar filtros
+    </button>
+  </div>
+
   <div *ngIf="loading" class="loading-state">
     <div class="spinner"></div>
     <p>Carregando histórico...</p>
   </div>
 
-  <!-- ERROR -->
   <div *ngIf="error && !loading" class="error-state">
     <p>{{ error }}</p>
     <button class="btn-retry" (click)="loadHistory()">Tentar novamente</button>
   </div>
 
-  <!-- EMPTY -->
-  <div *ngIf="!loading && !error && meetings.length === 0" class="empty-state">
+  <div *ngIf="!loading && !error && meetings.length === 0 && !hasActiveFilters" class="empty-state">
     <div class="empty-icon">📋</div>
     <h3>Nenhuma reunião ainda</h3>
     <p>Envie uma gravação para gerar seu primeiro resumo.</p>
     <a routerLink="/" class="btn-primary">Começar agora</a>
   </div>
 
-  <!-- LIST -->
-  <div *ngIf="meetings.length > 0" class="meetings-list">
+  <div *ngIf="!loading && !error && meetings.length === 0 && hasActiveFilters" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>Nenhum resultado encontrado</h3>
+    <p>Tente ajustar os filtros ou limpar a busca.</p>
+    <button class="btn-primary" (click)="clearFilters()">Limpar filtros</button>
+  </div>
+
+  <div *ngIf="!loading && meetings.length > 0" class="pagination-summary">
+    <span>Total: {{ pagination.total }}</span>
+    <span>Página {{ currentPage }} de {{ totalPages() }}</span>
+  </div>
+
+  <div *ngIf="!loading && meetings.length > 0" class="meetings-list">
     <div *ngFor="let m of meetings" class="meeting-card">
 
       <div class="card-header">
@@ -59,8 +107,34 @@
         </span>
         <span *ngIf="m.status === 'queued'" class="queued-hint">Na fila para processar</span>
         <span *ngIf="m.status === 'failed'" class="failed-hint">Falhou - envie novamente</span>
+
+        <div class="delete-area" *ngIf="m.id">
+          <ng-container *ngIf="confirmingDeleteId !== m.id; else confirmBlock">
+            <button class="btn-delete" (click)="requestDelete(m.id!)" title="Excluir reunião">
+              Excluir
+            </button>
+          </ng-container>
+          <ng-template #confirmBlock>
+            <span class="confirm-label">Tem certeza?</span>
+            <button
+              class="btn-confirm-delete"
+              (click)="confirmDelete(m.id!, m.meetingTitle)"
+              [disabled]="deletingId === m.id"
+            >
+              {{ deletingId === m.id ? 'Excluindo...' : 'Confirmar' }}
+            </button>
+            <button class="btn-cancel-delete" (click)="cancelDelete()" [disabled]="deletingId === m.id">
+              Cancelar
+            </button>
+          </ng-template>
+        </div>
       </div>
 
     </div>
+  </div>
+
+  <div *ngIf="!loading && meetings.length > 0" class="pagination-actions">
+    <button class="btn-page" (click)="previousPage()" [disabled]="currentPage <= 1">Anterior</button>
+    <button class="btn-page" (click)="nextPage()" [disabled]="!pagination.hasNextPage">Próxima</button>
   </div>
 </div>

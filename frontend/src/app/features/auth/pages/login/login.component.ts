@@ -15,7 +15,7 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   isLoading = false;
   error: string | null = null;
-  isLoginMode = true; // true para login, false para registro
+  isLoginMode = true;
 
   constructor(
     private fb: FormBuilder,
@@ -66,21 +66,18 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
 
-    // Preparar dados para envio
     let submitData: any;
     if (this.isLoginMode) {
       submitData = {
         email: this.loginForm.get('email')?.value,
         password: this.loginForm.get('password')?.value,
       };
-      console.log('[Login Component] Tentando fazer login com:', submitData.email);
     } else {
       submitData = {
         name: this.loginForm.get('name')?.value,
         email: this.loginForm.get('email')?.value,
         password: this.loginForm.get('password')?.value,
       };
-      console.log('[Login Component] Tentando registrar:', submitData.email);
     }
 
     const request = this.isLoginMode
@@ -88,14 +85,11 @@ export class LoginComponent implements OnInit {
       : this.authService.register(submitData);
 
     request.subscribe({
-      next: (response) => {
-        console.log('[Login Component] ✅ Autenticação bem-sucedida:', response.user.email);
-        console.log('[Login Component] Navegando para /');
+      next: () => {
         this.isLoading = false;
         this.router.navigate(['/']);
       },
       error: (error) => {
-        console.error('[Login Component] ❌ Erro de autenticação:', error);
         this.error = error.error?.error || error.error?.message || 'Erro ao processar solicitação. Tente novamente.';
         this.isLoading = false;
       },

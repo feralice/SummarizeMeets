@@ -21,6 +21,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'profile',
+    loadComponent: () =>
+      import('./features/profile/profile-page.component').then((m) => m.ProfilePageComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'meeting/:id',
     loadComponent: () =>
       import('./features/meeting/pages/meeting-details/meeting-details.component').then((m) => m.MeetingDetailsComponent),

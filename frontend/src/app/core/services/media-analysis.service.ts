@@ -26,16 +26,15 @@ export class VideoService {
             .put(uploadUrl, file, {
               headers: { 'Content-Type': file.type },
             })
-            .pipe(map(() => s3Key))
+            .pipe(map(() => s3Key)),
         ),
         // Step 3: notify backend to analyze the uploaded file
         switchMap((s3Key) =>
           this.http
-            .post<{ data: { meetingId: string; status: string } }>(
-              `${this.apiUrl}/analyze-media`,
-              { s3Key, meetingTitle }
-            )
-            .pipe(map((res) => res.data))
+            .post<{
+              data: { meetingId: string; status: string };
+            }>(`${this.apiUrl}/analyze-media`, { s3Key, meetingTitle })
+            .pipe(map((res) => res.data)),
         ),
         catchError(this.handleError),
       );
@@ -55,11 +54,30 @@ export class VideoService {
     );
   }
 
-  getMeetingDownloadUrl(id: string): Observable<string> {
-    return this.http.get<{ data: { downloadUrl: string } }>(`${this.apiUrl}/meetings/${id}/download-url`).pipe(
-      map((res) => res.data.downloadUrl),
+  updateMeeting(
+    id: string,
+    fields: {
+      meetingTitle?: string;
+      summary?: Meeting['summary'];
+      topics?: Meeting['topics'];
+      decisions?: Meeting['decisions'];
+      actionItems?: Meeting['actionItems'];
+      speakers?: Meeting['speakers'];
+    },
+  ): Observable<Meeting> {
+    return this.http.patch<{ data: Meeting }>(`${this.apiUrl}/meetings/${id}`, fields).pipe(
+      map((res) => res.data),
       catchError(this.handleError),
     );
+  }
+
+  getMeetingDownloadUrl(id: string): Observable<string> {
+    return this.http
+      .get<{ data: { downloadUrl: string } }>(`${this.apiUrl}/meetings/${id}/download-url`)
+      .pipe(
+        map((res) => res.data.downloadUrl),
+        catchError(this.handleError),
+      );
   }
 
   private handleError(error: HttpErrorResponse | Error) {

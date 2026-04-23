@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
+import { AuthService, AuthUser } from '../../../core/auth/auth.service';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -12,7 +12,7 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit {
-  currentUser: any = null;
+  currentUser: AuthUser | null = null;
   isAuthenticated = false;
 
   constructor(
